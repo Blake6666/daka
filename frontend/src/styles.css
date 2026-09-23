@@ -1,11 +1,21 @@
+/* ============================================================
+   今日热搜 · 界面样式
+   风格基调：简约但有质感——浅色底、柔和阴影、平台品牌色点缀
+   Day 7 MVP + 界面优化第 2 版（放大尺寸 + 鲜活元素）
+   ============================================================ */
+
 :root {
-  --bg: #f5f6f8;
+  --bg: #f4f5f9;
   --card: #ffffff;
   --text: #1f2329;
   --text-weak: #6b7280;
-  --line: #e5e7eb;
-  --accent: #d7263d;
-  --radius: 14px;
+  --line: #e8eaf0;
+  --accent: #e6394f;
+  --accent-deep: #d7263d;
+  --radius: 16px;
+  /* 两层柔和阴影：卡片静止用浅的，悬停用深的 */
+  --shadow-1: 0 1px 2px rgba(31, 35, 41, 0.04), 0 6px 20px rgba(31, 35, 41, 0.05);
+  --shadow-2: 0 2px 6px rgba(31, 35, 41, 0.06), 0 14px 36px rgba(31, 35, 41, 0.1);
 }
 
 * {
@@ -20,36 +30,65 @@ body,
 
 body {
   margin: 0;
-  background: var(--bg);
   color: var(--text);
   font-family: 'PingFang SC', 'Microsoft YaHei', 'Segoe UI', system-ui,
     -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
+  /* 底色不再是死白/死灰：顶部带一点暖光晕，往下过渡到浅灰 */
+  background:
+    radial-gradient(900px 320px at 50% -80px, rgba(230, 57, 79, 0.06), transparent 70%),
+    linear-gradient(180deg, #f2f4f8 0%, #f6f7fa 55%, #f4f5f9 100%);
+  background-attachment: fixed;
 }
 
 .page {
-  max-width: 1180px;
+  max-width: 1300px;
   margin: 0 auto;
-  padding: 28px 20px 40px;
+  padding: 24px 22px 48px;
 }
 
+/* ============ 顶栏：吸顶白卡，滚动时也看得到标题和收藏入口 ============ */
+
 .topbar {
+  position: sticky;
+  top: 12px;
+  z-index: 20;
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   justify-content: space-between;
   gap: 16px;
   flex-wrap: wrap;
-  margin-bottom: 20px;
+  margin-bottom: 24px;
+  padding: 16px 24px;
+  background: rgba(255, 255, 255, 0.86);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(232, 234, 240, 0.9);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-1);
 }
 
 .brand h1 {
   margin: 0;
-  font-size: 28px;
+  font-size: 30px;
   letter-spacing: 0.5px;
+  /* 标题渐变色：红到橙，热搜产品的味道 */
+  background: linear-gradient(120deg, #d7263d 20%, #f0642e 90%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  display: inline-block;
+}
+
+.logo-fire {
+  font-size: 26px;
+  margin-right: 5px;
+  /* 火焰 emoji 不跟着渐变，单独还原成彩色 */
+  -webkit-text-fill-color: initial;
 }
 
 .subtitle {
-  margin: 6px 0 0;
+  margin: 5px 0 0;
   color: var(--text-weak);
   font-size: 14px;
 }
@@ -57,135 +96,239 @@ body {
 .topbar-right {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
+  flex-wrap: wrap;
 }
 
+/* 更新时间：做成小胶囊 */
 .update-time {
   color: var(--text-weak);
   font-size: 13px;
+  padding: 6px 13px;
+  border-radius: 999px;
+  background: #f1f2f6;
+  font-variant-numeric: tabular-nums;
 }
 
+/* 收藏入口：普通描边按钮，不带任何数字角标（避免"消息提醒"的压迫感） */
 .fav-entry {
-  position: relative;
   border: 1px solid var(--line);
   background: #fff;
   color: var(--text);
-  padding: 8px 14px;
+  padding: 9px 18px;
   border-radius: 999px;
-  font-size: 13px;
+  font-size: 14px;
   cursor: pointer;
-  transition: border-color 0.15s ease, color 0.15s ease;
+  transition: border-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
 }
 
 .fav-entry:hover {
   border-color: var(--accent);
   color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(230, 57, 79, 0.08);
 }
 
-.fav-badge {
-  display: inline-block;
-  margin-left: 6px;
-  min-width: 18px;
-  padding: 0 5px;
-  border-radius: 999px;
-  background: var(--accent);
-  color: #fff;
-  font-size: 11px;
-  line-height: 18px;
-  text-align: center;
-}
+/* ============ 三栏榜单 ============ */
 
 .board {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 18px;
+  gap: 22px;
 }
 
 .column {
+  position: relative;
   background: var(--card);
-  border: 1px solid var(--line);
+  border: 1px solid #eef0f5;
   border-radius: var(--radius);
   overflow: hidden;
-  min-height: 320px;
+  min-height: 340px;
   display: flex;
   flex-direction: column;
+  box-shadow: var(--shadow-1);
+  transition: box-shadow 0.2s ease;
+}
+
+.column:hover {
+  box-shadow: var(--shadow-2);
+}
+
+/* 每栏顶部一条 4px 平台品牌色带（界面感的点睛之笔） */
+.column::before {
+  content: '';
+  display: block;
+  height: 4px;
+  background: linear-gradient(90deg, #c3c8d0, #dfe2e8);
+}
+
+.column.weibo::before {
+  background: linear-gradient(90deg, #ff8a00, #ff2442);
+}
+
+.column.baidu::before {
+  background: linear-gradient(90deg, #4e6ef2, #2932e1);
+}
+
+.column.douyin::before {
+  background: linear-gradient(90deg, #00c8be 0%, #161823 55%, #fe2c55 100%);
 }
 
 .column-head {
-  padding: 14px 16px;
-  border-bottom: 1px solid var(--line);
+  padding: 16px 20px 13px;
+  border-bottom: 1px solid #f1f2f6;
   display: flex;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
   gap: 8px;
 }
 
 .column-head h2 {
   margin: 0;
-  font-size: 16px;
+  font-size: 17px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* 栏目标题用平台色渐变字（参考抖音"精选热榜"的渐变标题） */
+.column.weibo .column-head h2 {
+  background: linear-gradient(90deg, #ff7a18, #ff2442);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.column.baidu .column-head h2 {
+  background: linear-gradient(90deg, #4e6ef2, #2932e1);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.column.douyin .column-head h2 {
+  background: linear-gradient(90deg, #161823, #fe2c55);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* 平台名前面的小圆点，跟着平台走色 */
+.column-head h2::before {
+  content: '';
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #c3c8d0;
+  flex: none;
+}
+
+.column.weibo .column-head h2::before {
+  background: #ff5a36;
+}
+
+.column.baidu .column-head h2::before {
+  background: #2932e1;
+}
+
+.column.douyin .column-head h2::before {
+  background: #fe2c55;
 }
 
 .column-hint {
-  font-size: 12px;
-  color: var(--text-weak);
-}
-
-.column-body {
-  flex: 1;
-  padding: 16px;
-}
-
-.column-body.empty {
-  display: flex;
-  flex-direction: column;
+  display: inline-flex;
   align-items: center;
-  justify-content: center;
   gap: 6px;
-  text-align: center;
-  color: var(--text-weak);
-}
-
-.column-body.empty p {
-  margin: 0;
-  font-size: 14px;
-}
-
-.empty-note {
   font-size: 12px;
   color: #9aa1ab;
-}
-
-.footnote {
-  margin-top: 22px;
-  text-align: center;
-  color: var(--text-weak);
-  font-size: 12px;
-}
-
-.sample-badge {
-  display: inline-block;
-  padding: 3px 10px;
+  padding: 4px 11px;
   border-radius: 999px;
-  font-size: 12px;
-  color: #8a5a00;
-  background: #fff4dd;
-  border: 1px solid #f3ddb0;
+  background: #f4f5f8;
+  white-space: nowrap;
 }
+
+/* 呼吸灯：红点一圈圈扩散，制造"正在实时更新"的感觉 */
+.live-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--accent);
+  flex: none;
+  animation: live-pulse 1.6s ease-out infinite;
+}
+
+@keyframes live-pulse {
+  0% { box-shadow: 0 0 0 0 rgba(230, 57, 79, 0.45); }
+  70% { box-shadow: 0 0 0 6px rgba(230, 57, 79, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(230, 57, 79, 0); }
+}
+
+/* ============ 榜单条目 ============ */
 
 .hot-list {
   list-style: none;
   margin: 0;
-  padding: 8px;
+  padding: 10px 12px;
   flex: 1;
 }
 
 .hot-item {
   display: flex;
   align-items: flex-start;
-  gap: 10px;
-  padding: 9px 10px;
-  border-radius: 10px;
+  gap: 12px;
+  padding: 12px 10px;
+  border-radius: 12px;
   transition: background-color 0.15s ease;
+}
+
+/* 前三名带一层浅灰底，和普通名次拉开层次（参考抖音热榜） */
+.hot-item.top {
+  background: #f7f8fa;
+}
+
+.hot-item:hover {
+  background: #f1f3f7;
+}
+
+/* 排名：4 名以后素灰数字（无底色）；前三名金/银/铜六边形奖牌（参考抖音热榜） */
+.hot-item .rank {
+  flex: none;
+  width: 26px;
+  height: 26px;
+  line-height: 26px;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 700;
+  color: #b6bcc7;
+  font-variant-numeric: tabular-nums;
+}
+
+.hot-item .rank.rank-1,
+.hot-item .rank.rank-2,
+.hot-item .rank.rank-3 {
+  width: 28px;
+  height: 28px;
+  line-height: 28px;
+  color: #fff;
+  font-size: 13px;
+  /* 六边形奖牌形状 */
+  clip-path: polygon(25% 0, 75% 0, 100% 50%, 75% 100%, 25% 100%, 0 50%);
+}
+
+.hot-item .rank.rank-1 {
+  background: linear-gradient(135deg, #ffd873, #f5a623);
+}
+
+.hot-item .rank.rank-2 {
+  background: linear-gradient(135deg, #e8ecf1, #a9b4c2);
+}
+
+.hot-item .rank.rank-3 {
+  background: linear-gradient(135deg, #f2b28c, #d97b4a);
+}
+
+/* 前三名的标题加粗一点，跟普通条目拉开层次 */
+.hot-item.top .title {
+  font-weight: 600;
 }
 
 .item-main {
@@ -193,51 +336,14 @@ body {
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 5px;
 }
 
 .item-row {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 9px;
   min-width: 0;
-}
-
-.hot-item:hover {
-  background: #f6f7f9;
-}
-
-.hot-item .rank {
-  flex: none;
-  width: 22px;
-  text-align: center;
-  font-size: 13px;
-  font-weight: 600;
-  color: #9aa1ab;
-  font-variant-numeric: tabular-nums;
-}
-
-/* 前三名：醒目但不刺眼（PRD 第 5 节） */
-.hot-item.top .rank {
-  color: #fff;
-  border-radius: 6px;
-  line-height: 22px;
-}
-
-.hot-item.top .rank {
-  background: #9aa1ab;
-}
-
-.hot-item:nth-child(1) .rank {
-  background: var(--accent);
-}
-
-.hot-item:nth-child(2) .rank {
-  background: #f0762b;
-}
-
-.hot-item:nth-child(3) .rank {
-  background: #f2a83b;
 }
 
 .hot-item .title {
@@ -245,34 +351,93 @@ body {
   min-width: 0;
   color: var(--text);
   text-decoration: none;
-  font-size: 14px;
+  font-size: 15px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  transition: color 0.15s ease;
 }
 
 .hot-item .title:hover {
   color: var(--accent);
 }
 
+/* 热搜标签：沸 / 热 / 新（热搜产品的标配小彩标） */
+.tag {
+  flex: none;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+  padding: 3px 6px;
+  border-radius: 5px;
+}
+
+.tag-fei {
+  color: #fff;
+  background: linear-gradient(135deg, #ff2442, #ff6a3d);
+}
+
+.tag-re {
+  color: #f43f5e;
+  background: #ffe9ec;
+}
+
+.tag-xin {
+  color: #f43f5e;
+  background: #ffe9ec;
+}
+
+/* 热度值：普通条目灰色；前三名染上主题色，跟排名徽章呼应 */
 .hot-item .heat {
   flex: none;
-  font-size: 12px;
+  font-size: 13px;
   color: #9aa1ab;
   font-variant-numeric: tabular-nums;
 }
 
-/* 收藏星标：默认灰色空心，已收藏红色实心，点按有缩放反馈 */
+.hot-item.top .heat {
+  color: #f0593a;
+  font-weight: 600;
+}
+
+/* （热度条已按参考图风格移除——抖音热榜风不加装饰条，靠行距和层次取胜） */
+
+/* 每栏底部：查看完整榜单 */
+.view-more {
+  display: block;
+  text-align: center;
+  padding: 13px 16px;
+  border-top: 1px solid #f1f2f6;
+  font-size: 13.5px;
+  color: #9aa1ab;
+  text-decoration: none;
+  transition: color 0.15s ease, background-color 0.15s ease;
+}
+
+.view-more:hover {
+  color: var(--accent);
+  background: #f8f9fc;
+}
+
+/* ============ 收藏星标 ============ */
+
 .fav-star {
   flex: none;
   border: none;
   background: none;
   padding: 0;
-  font-size: 18px;
+  font-size: 19px;
   line-height: 1;
   color: #c3c8d0;
   cursor: pointer;
-  transition: color 0.15s ease, transform 0.1s ease;
+  /* 平时藏起来，界面更干净；鼠标移到这条上才出现，已收藏的常显 */
+  opacity: 0;
+  transition: color 0.15s ease, transform 0.1s ease, opacity 0.15s ease;
+}
+
+.hot-item:hover .fav-star,
+.fav-star.active {
+  opacity: 1;
 }
 
 .fav-star:hover {
@@ -288,7 +453,8 @@ body {
   transform: scale(0.85);
 }
 
-/* 备注：已收藏条目下方 */
+/* ============ 备注 ============ */
+
 .note-area {
   display: flex;
   align-items: center;
@@ -298,11 +464,12 @@ body {
 
 .note-text {
   margin: 0;
-  font-size: 12px;
+  font-size: 12.5px;
   color: #6b7280;
   background: #f6f7f9;
+  border-left: 3px solid #e6e8ee;
   border-radius: 6px;
-  padding: 2px 8px;
+  padding: 3px 8px;
   max-width: 100%;
   overflow-wrap: anywhere;
 }
@@ -311,7 +478,7 @@ body {
   border: none;
   background: none;
   padding: 0;
-  font-size: 12px;
+  font-size: 12.5px;
   color: #9aa1ab;
   cursor: pointer;
 }
@@ -331,10 +498,11 @@ body {
   min-width: 0;
   border: 1px solid var(--line);
   border-radius: 8px;
-  padding: 6px 10px;
-  font-size: 12px;
+  padding: 7px 11px;
+  font-size: 13px;
   color: var(--text);
   outline: none;
+  transition: border-color 0.15s ease;
 }
 
 .note-editor input:focus {
@@ -346,8 +514,8 @@ body {
   border-radius: 8px;
   background: var(--accent);
   color: #fff;
-  font-size: 12px;
-  padding: 6px 12px;
+  font-size: 12.5px;
+  padding: 7px 13px;
   cursor: pointer;
 }
 
@@ -356,28 +524,43 @@ body {
   color: var(--text-weak);
 }
 
-/* 「我的收藏」弹层 */
+/* ============ 「我的收藏」弹层 ============ */
+
 .modal-mask {
   position: fixed;
   inset: 0;
-  background: rgba(15, 18, 25, 0.35);
+  background: rgba(15, 18, 25, 0.4);
+  backdrop-filter: blur(2px);
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 20px;
   z-index: 50;
+  animation: fade-in 0.15s ease;
 }
 
 .modal {
-  width: min(600px, 100%);
+  width: min(620px, 100%);
   max-height: 80vh;
   overflow: auto;
   background: #fff;
-  border-radius: var(--radius);
-  padding: 18px 20px;
+  border-radius: 18px;
+  padding: 22px 24px;
+  box-shadow: var(--shadow-2);
   display: flex;
   flex-direction: column;
   gap: 12px;
+  animation: pop-in 0.18s ease;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes pop-in {
+  from { opacity: 0; transform: translateY(10px) scale(0.98); }
+  to { opacity: 1; transform: none; }
 }
 
 .modal-head {
@@ -388,17 +571,18 @@ body {
 
 .modal-head h3 {
   margin: 0;
-  font-size: 17px;
+  font-size: 18px;
 }
 
 .modal-head button {
   border: 1px solid var(--line);
   background: #fff;
   border-radius: 999px;
-  padding: 6px 14px;
+  padding: 6px 15px;
   font-size: 13px;
   color: var(--text);
   cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease;
 }
 
 .modal-head button:hover {
@@ -426,8 +610,8 @@ body {
   display: flex;
   align-items: flex-start;
   gap: 10px;
-  padding: 10px 4px;
-  border-bottom: 1px solid var(--line);
+  padding: 11px 6px;
+  border-bottom: 1px solid #f1f2f6;
 }
 
 .fav-item:last-child {
@@ -482,9 +666,8 @@ body {
   text-align: center;
 }
 
-/* ===== 异常状态（PRD 第 7 节）===== */
+/* ============ 异常状态（PRD 第 7 节）============ */
 
-/* 单榜失败 / 空榜单：占满这一栏 */
 .col-error,
 .col-empty {
   flex: 1;
@@ -514,22 +697,22 @@ body {
   color: var(--text-weak);
 }
 
-/* 重试按钮 */
 .retry-btn {
   margin-top: 6px;
   border: 1px solid var(--line);
   border-radius: 999px;
   background: #fff;
   color: var(--text);
-  padding: 7px 22px;
+  padding: 8px 24px;
   font-size: 13px;
   cursor: pointer;
-  transition: border-color 0.15s ease, color 0.15s ease;
+  transition: border-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
 }
 
 .retry-btn:hover {
   border-color: var(--accent);
   color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(230, 57, 79, 0.08);
 }
 
 .retry-btn:active {
@@ -540,8 +723,9 @@ body {
 .all-error {
   grid-column: 1 / -1;
   background: var(--card);
-  border: 1px solid var(--line);
+  border: 1px solid #eef0f5;
   border-radius: var(--radius);
+  box-shadow: var(--shadow-1);
   padding: 60px 20px;
   display: flex;
   flex-direction: column;
@@ -562,19 +746,60 @@ body {
   color: var(--text-weak);
 }
 
-/* 整页加载中 */
-.all-loading {
-  grid-column: 1 / -1;
-  background: var(--card);
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  padding: 60px 20px;
-  text-align: center;
-  color: var(--text-weak);
-  font-size: 14px;
+/* ============ 骨架屏（加载时的占位轮廓）============ */
+
+.sk {
+  border-radius: 8px;
+  background: linear-gradient(90deg, #eef0f4 25%, #f7f8fb 50%, #eef0f4 75%);
+  background-size: 200% 100%;
+  animation: sk-move 1.15s linear infinite;
 }
 
-/* 底部异常演示开关（验收第 8 条用） */
+@keyframes sk-move {
+  from { background-position: 200% 0; }
+  to { background-position: -200% 0; }
+}
+
+.sk-head {
+  height: 19px;
+  width: 96px;
+}
+
+.sk-chip {
+  height: 22px;
+  width: 108px;
+  border-radius: 999px;
+}
+
+.sk-item {
+  height: 16px;
+  margin: 13px 8px;
+}
+
+/* 占位条长短不一，更像真实榜单 */
+.sk-item:nth-child(3n) { width: 82%; }
+.sk-item:nth-child(4n) { width: 64%; }
+.sk-item:nth-child(7n) { width: 72%; }
+
+/* ============ 页脚与演示开关 ============ */
+
+.footnote {
+  margin-top: 26px;
+  text-align: center;
+  color: var(--text-weak);
+  font-size: 12.5px;
+}
+
+.sample-badge {
+  display: inline-block;
+  padding: 4px 11px;
+  border-radius: 999px;
+  font-size: 12.5px;
+  color: #8a5a00;
+  background: linear-gradient(180deg, #fff7e4, #ffefc9);
+  border: 1px solid #f3ddb0;
+}
+
 .demo-bar {
   display: flex;
   align-items: center;
@@ -608,13 +833,24 @@ body {
   color: var(--accent);
 }
 
-/* 手机 / 窄窗口：三栏自动变成上下堆叠（PRD 第 5 节布局 A） */
+/* ============ 手机 / 窄窗口：三栏自动堆叠（PRD 布局 A）============ */
+
 @media (max-width: 900px) {
   .board {
     grid-template-columns: 1fr;
   }
 
   .brand h1 {
-    font-size: 24px;
+    font-size: 25px;
+  }
+
+  /* 手机上吸顶卡占空间，改回普通文档流 */
+  .topbar {
+    position: static;
+  }
+
+  /* 手机没有鼠标悬停，收藏星标常显 */
+  .fav-star {
+    opacity: 1;
   }
 }
