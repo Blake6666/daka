@@ -1,21 +1,35 @@
 /* ============================================================
-   今日热搜 · 界面样式
-   风格基调：简约但有质感——浅色底、柔和阴影、平台品牌色点缀
-   Day 7 MVP + 界面优化第 2 版（放大尺寸 + 鲜活元素）
+   全网热搜聚合 · 界面样式
+   设计基调（用户设计稿）：简约高级、留白舒适、浅灰底 #f8f9fa、
+   白卡大圆角柔阴影、平台品牌色只作点缀（抖音黑/B站粉/百度蓝）
+   Day 8 第 1 步：骨架（导航栏 + Hero + 三卡 TOP20）
    ============================================================ */
 
 :root {
-  --bg: #f4f5f9;
+  --bg: #f8f9fa;
   --card: #ffffff;
   --text: #1f2329;
   --text-weak: #6b7280;
+  --text-faint: #9aa1ab;
   --line: #e8eaf0;
   --accent: #e6394f;
   --accent-deep: #d7263d;
-  --radius: 16px;
-  /* 两层柔和阴影：卡片静止用浅的，悬停用深的 */
-  --shadow-1: 0 1px 2px rgba(31, 35, 41, 0.04), 0 6px 20px rgba(31, 35, 41, 0.05);
-  --shadow-2: 0 2px 6px rgba(31, 35, 41, 0.06), 0 14px 36px rgba(31, 35, 41, 0.1);
+  --radius: 18px;
+  /* 柔和淡阴影：静止一层、悬停加深 */
+  --shadow-1: 0 1px 2px rgba(31, 35, 41, 0.04), 0 8px 24px rgba(31, 35, 41, 0.05);
+  --shadow-2: 0 2px 8px rgba(31, 35, 41, 0.07), 0 16px 40px rgba(31, 35, 41, 0.1);
+}
+
+/* 深色模式变量（第 2 步接通切换，先定义好） */
+.page[data-theme='dark'] {
+  --bg: #14161b;
+  --card: #1e2129;
+  --text: #e8eaf0;
+  --text-weak: #a0a6b1;
+  --text-faint: #7c8290;
+  --line: #2e323d;
+  --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px rgba(0, 0, 0, 0.35);
+  --shadow-2: 0 2px 8px rgba(0, 0, 0, 0.4), 0 16px 40px rgba(0, 0, 0, 0.5);
 }
 
 * {
@@ -34,101 +48,272 @@ body {
   font-family: 'PingFang SC', 'Microsoft YaHei', 'Segoe UI', system-ui,
     -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
-  /* 底色不再是死白/死灰：顶部带一点暖光晕，往下过渡到浅灰 */
   background:
-    radial-gradient(900px 320px at 50% -80px, rgba(230, 57, 79, 0.06), transparent 70%),
-    linear-gradient(180deg, #f2f4f8 0%, #f6f7fa 55%, #f4f5f9 100%);
+    radial-gradient(900px 320px at 50% -80px, rgba(230, 57, 79, 0.05), transparent 70%),
+    var(--bg);
   background-attachment: fixed;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* 深色模式：页面底色切换（由 JS 给 body 挂 dark 类触发，全组件平滑过渡） */
+body.dark {
+  background: #14161b;
 }
 
 .page {
   max-width: 1300px;
   margin: 0 auto;
-  padding: 24px 22px 48px;
+  padding: 20px 22px 48px;
 }
 
-/* ============ 顶栏：吸顶白卡，滚动时也看得到标题和收藏入口 ============ */
+/* ============ 顶部导航栏：吸顶悬浮 ============ */
 
-.topbar {
+.navbar {
   position: sticky;
   top: 12px;
-  z-index: 20;
+  z-index: 30;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 16px;
+  gap: 18px;
   flex-wrap: wrap;
-  margin-bottom: 24px;
-  padding: 16px 24px;
-  background: rgba(255, 255, 255, 0.86);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  margin-bottom: 26px;
+  padding: 14px 22px;
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
   border: 1px solid rgba(232, 234, 240, 0.9);
   border-radius: var(--radius);
   box-shadow: var(--shadow-1);
+  transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
-.brand h1 {
-  margin: 0;
-  font-size: 30px;
+.page[data-theme='dark'] .navbar {
+  background: rgba(30, 33, 41, 0.88);
+  border-color: var(--line);
+}
+
+.nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: none;
+}
+
+.nav-logo {
+  font-size: 24px;
+}
+
+.nav-name {
+  font-size: 19px;
+  font-weight: 700;
   letter-spacing: 0.5px;
-  /* 标题渐变色：红到橙，热搜产品的味道 */
   background: linear-gradient(120deg, #d7263d 20%, #f0642e 90%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-  display: inline-block;
 }
 
-.logo-fire {
-  font-size: 26px;
-  margin-right: 5px;
-  /* 火焰 emoji 不跟着渐变，单独还原成彩色 */
-  -webkit-text-fill-color: initial;
+/* 搜索框：中间占位，第 2 步接通实时筛选 */
+.nav-search {
+  flex: 1;
+  min-width: 200px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #f1f2f6;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  padding: 9px 16px;
+  transition: border-color 0.15s ease, background-color 0.3s ease;
 }
 
-.subtitle {
-  margin: 5px 0 0;
-  color: var(--text-weak);
+.page[data-theme='dark'] .nav-search {
+  background: #262a34;
+}
+
+.nav-search:focus-within {
+  border-color: var(--accent);
+  background: var(--card);
+}
+
+.nav-search-icon {
   font-size: 14px;
+  opacity: 0.55;
 }
 
-.topbar-right {
+.nav-search input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  background: none;
+  outline: none;
+  font-size: 14px;
+  color: var(--text);
+}
+
+.nav-search input::placeholder {
+  color: var(--text-faint);
+}
+
+/* 搜索框右侧的清空小按钮（有内容时才出现） */
+.nav-search-clear {
+  flex: none;
+  border: none;
+  background: none;
+  color: var(--text-faint);
+  font-size: 13px;
+  cursor: pointer;
+  padding: 0 2px;
+  line-height: 1;
+}
+
+.nav-search-clear:hover {
+  color: var(--accent);
+}
+
+.nav-actions {
   display: flex;
   align-items: center;
   gap: 10px;
-  flex-wrap: wrap;
+  flex: none;
 }
 
-/* 更新时间：做成小胶囊 */
-.update-time {
-  color: var(--text-weak);
-  font-size: 13px;
-  padding: 6px 13px;
-  border-radius: 999px;
-  background: #f1f2f6;
-  font-variant-numeric: tabular-nums;
-}
-
-/* 收藏入口：普通描边按钮，不带任何数字角标（避免"消息提醒"的压迫感） */
-.fav-entry {
+.nav-btn {
   border: 1px solid var(--line);
-  background: #fff;
+  background: var(--card);
   color: var(--text);
-  padding: 9px 18px;
+  padding: 9px 16px;
   border-radius: 999px;
   font-size: 14px;
   cursor: pointer;
   transition: border-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
 }
 
-.fav-entry:hover {
+.nav-btn:hover:not(:disabled) {
   border-color: var(--accent);
   color: var(--accent);
   box-shadow: 0 0 0 3px rgba(230, 57, 79, 0.08);
 }
 
-/* ============ 三栏榜单 ============ */
+.nav-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* 刷新图标：加载时持续旋转 */
+.refresh-icon {
+  display: inline-block;
+}
+
+.refresh-icon.spinning {
+  animation: refresh-rot 0.8s linear infinite;
+}
+
+@keyframes refresh-rot {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* 刷新成功提示：底部中央的轻量 toast，自动消失 */
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 30px;
+  transform: translateX(-50%);
+  background: #1f2329;
+  color: #fff;
+  font-size: 13.5px;
+  padding: 11px 22px;
+  border-radius: 999px;
+  box-shadow: 0 8px 28px rgba(15, 18, 25, 0.28);
+  z-index: 60;
+  animation: toast-in 0.25s ease;
+}
+
+.page[data-theme='dark'] .toast {
+  background: #e8eaf0;
+  color: #1f2329;
+}
+
+@keyframes toast-in {
+  from { opacity: 0; transform: translateX(-50%) translateY(10px); }
+  to { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+/* ============ Hero 区：简介 + 统计面板 ============ */
+
+.hero {
+  text-align: center;
+  margin-bottom: 28px;
+  padding: 12px 0 4px;
+}
+
+.hero-title {
+  margin: 0;
+  font-size: 28px;
+  letter-spacing: 0.5px;
+  background: linear-gradient(120deg, #d7263d 15%, #f0642e 85%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.hero-sub {
+  margin: 8px 0 20px;
+  color: var(--text-weak);
+  font-size: 14.5px;
+}
+
+.stat-cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1.6fr;
+  gap: 16px;
+  max-width: 880px;
+  margin: 0 auto;
+}
+
+.stat-card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-1);
+  padding: 18px 20px;
+  text-align: center;
+  transition: box-shadow 0.2s ease, transform 0.2s ease, background-color 0.3s ease;
+}
+
+.stat-card:hover {
+  box-shadow: var(--shadow-2);
+  transform: translateY(-2px);
+}
+
+.stat-num {
+  margin: 0;
+  font-size: 30px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  background: linear-gradient(120deg, #d7263d, #f0642e);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.stat-top-title {
+  font-size: 17px;
+  line-height: 1.4;
+  /* 标题最多一行，长了省略 */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.stat-label {
+  margin: 6px 0 0;
+  font-size: 12.5px;
+  color: var(--text-faint);
+}
+
+/* ============ 三卡片榜单 ============ */
 
 .board {
   display: grid;
@@ -139,21 +324,21 @@ body {
 .column {
   position: relative;
   background: var(--card);
-  border: 1px solid #eef0f5;
+  border: 1px solid var(--line);
   border-radius: var(--radius);
   overflow: hidden;
   min-height: 340px;
   display: flex;
   flex-direction: column;
   box-shadow: var(--shadow-1);
-  transition: box-shadow 0.2s ease;
+  transition: box-shadow 0.2s ease, background-color 0.3s ease;
 }
 
 .column:hover {
   box-shadow: var(--shadow-2);
 }
 
-/* 每栏顶部一条 4px 平台品牌色带（界面感的点睛之笔） */
+/* 每栏顶部 4px 平台品牌色带（品牌色只作点缀，不大面积铺色） */
 .column::before {
   content: '';
   display: block;
@@ -161,21 +346,21 @@ body {
   background: linear-gradient(90deg, #c3c8d0, #dfe2e8);
 }
 
-.column.weibo::before {
-  background: linear-gradient(90deg, #ff8a00, #ff2442);
-}
-
-.column.baidu::before {
-  background: linear-gradient(90deg, #4e6ef2, #2932e1);
-}
-
 .column.douyin::before {
   background: linear-gradient(90deg, #00c8be 0%, #161823 55%, #fe2c55 100%);
 }
 
+.column.bilibili::before {
+  background: linear-gradient(90deg, #fb7299, #e75480);
+}
+
+.column.baidu::before {
+  background: linear-gradient(90deg, #4e9af5, #2982eb);
+}
+
 .column-head {
   padding: 16px 20px 13px;
-  border-bottom: 1px solid #f1f2f6;
+  border-bottom: 1px solid var(--line);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -185,26 +370,10 @@ body {
 .column-head h2 {
   margin: 0;
   font-size: 17px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
+  font-weight: 700;
 }
 
-/* 栏目标题用平台色渐变字（参考抖音"精选热榜"的渐变标题） */
-.column.weibo .column-head h2 {
-  background: linear-gradient(90deg, #ff7a18, #ff2442);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-}
-
-.column.baidu .column-head h2 {
-  background: linear-gradient(90deg, #4e6ef2, #2932e1);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-}
-
+/* 栏目标题用平台色渐变字 */
 .column.douyin .column-head h2 {
   background: linear-gradient(90deg, #161823, #fe2c55);
   -webkit-background-clip: text;
@@ -212,26 +381,18 @@ body {
   color: transparent;
 }
 
-/* 平台名前面的小圆点，跟着平台走色 */
-.column-head h2::before {
-  content: '';
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
-  background: #c3c8d0;
-  flex: none;
+.column.bilibili .column-head h2 {
+  background: linear-gradient(90deg, #fb7299, #e75480);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }
 
-.column.weibo .column-head h2::before {
-  background: #ff5a36;
-}
-
-.column.baidu .column-head h2::before {
-  background: #2932e1;
-}
-
-.column.douyin .column-head h2::before {
-  background: #fe2c55;
+.column.baidu .column-head h2 {
+  background: linear-gradient(90deg, #4e9af5, #2982eb);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }
 
 .column-hint {
@@ -239,14 +400,18 @@ body {
   align-items: center;
   gap: 6px;
   font-size: 12px;
-  color: #9aa1ab;
+  color: var(--text-faint);
   padding: 4px 11px;
   border-radius: 999px;
   background: #f4f5f8;
   white-space: nowrap;
 }
 
-/* 呼吸灯：红点一圈圈扩散，制造"正在实时更新"的感觉 */
+.page[data-theme='dark'] .column-hint {
+  background: #262a34;
+}
+
+/* 呼吸灯：红点一圈圈扩散 */
 .live-dot {
   width: 7px;
   height: 7px;
@@ -275,21 +440,31 @@ body {
   display: flex;
   align-items: flex-start;
   gap: 12px;
-  padding: 12px 10px;
+  padding: 9px 10px;
   border-radius: 12px;
-  transition: background-color 0.15s ease;
+  transition: background-color 0.15s ease, transform 0.15s ease;
 }
 
-/* 前三名带一层浅灰底，和普通名次拉开层次（参考抖音热榜） */
+/* 前三名带一层浅灰底 */
 .hot-item.top {
   background: #f7f8fa;
 }
 
-.hot-item:hover {
-  background: #f1f3f7;
+.page[data-theme='dark'] .hot-item.top {
+  background: #242832;
 }
 
-/* 排名：4 名以后素灰数字（无底色）；前三名金/银/铜六边形奖牌（参考抖音热榜） */
+/* 悬浮：背景高亮 + 轻微上浮（title 属性提供悬浮提示） */
+.hot-item:hover {
+  background: #f1f3f7;
+  transform: translateY(-1px);
+}
+
+.page[data-theme='dark'] .hot-item:hover {
+  background: #2a2f3b;
+}
+
+/* 排名：4 名以后素灰数字；前三名金/银/铜六边形奖牌 */
 .hot-item .rank {
   flex: none;
   width: 26px;
@@ -310,7 +485,6 @@ body {
   line-height: 28px;
   color: #fff;
   font-size: 13px;
-  /* 六边形奖牌形状 */
   clip-path: polygon(25% 0, 75% 0, 100% 50%, 75% 100%, 25% 100%, 0 50%);
 }
 
@@ -326,7 +500,6 @@ body {
   background: linear-gradient(135deg, #f2b28c, #d97b4a);
 }
 
-/* 前三名的标题加粗一点，跟普通条目拉开层次 */
 .hot-item.top .title {
   font-weight: 600;
 }
@@ -362,7 +535,7 @@ body {
   color: var(--accent);
 }
 
-/* 热搜标签：沸 / 热 / 新（热搜产品的标配小彩标） */
+/* 热搜标签：沸=红底白字，热/新=粉底红字 */
 .tag {
   flex: none;
   font-size: 11px;
@@ -387,39 +560,64 @@ body {
   background: #ffe9ec;
 }
 
-/* 热度值：普通条目灰色；前三名染上主题色，跟排名徽章呼应 */
+/* 热度值：浅灰色、等宽数字 */
 .hot-item .heat {
   flex: none;
   font-size: 13px;
-  color: #9aa1ab;
+  color: var(--text-faint);
   font-variant-numeric: tabular-nums;
 }
 
-.hot-item.top .heat {
-  color: #f0593a;
-  font-weight: 600;
+/* 迷你热度条：条目下方一条细渐变条，长度随热度比例 */
+.heat-bar {
+  height: 3px;
+  background: #f0f1f5;
+  border-radius: 999px;
+  overflow: hidden;
 }
 
-/* （热度条已按参考图风格移除——抖音热榜风不加装饰条，靠行距和层次取胜） */
+.page[data-theme='dark'] .heat-bar {
+  background: #2a2f3b;
+}
+
+.heat-bar i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #f0b4bc, #e6394f);
+  transition: width 0.5s ease;
+}
+
+.column.douyin .heat-bar i {
+  background: linear-gradient(90deg, #5ee7df, #fe2c55);
+}
+
+.column.bilibili .heat-bar i {
+  background: linear-gradient(90deg, #fcb1c9, #fb7299);
+}
+
+.column.baidu .heat-bar i {
+  background: linear-gradient(90deg, #8bb8f7, #2982eb);
+}
 
 /* 每栏底部：查看完整榜单 */
 .view-more {
   display: block;
   text-align: center;
   padding: 13px 16px;
-  border-top: 1px solid #f1f2f6;
+  border-top: 1px solid var(--line);
   font-size: 13.5px;
-  color: #9aa1ab;
+  color: var(--text-faint);
   text-decoration: none;
   transition: color 0.15s ease, background-color 0.15s ease;
 }
 
 .view-more:hover {
   color: var(--accent);
-  background: #f8f9fc;
+  background: rgba(230, 57, 79, 0.04);
 }
 
-/* ============ 收藏星标 ============ */
+/* ============ 收藏星标：平时隐藏，悬浮出现，已收藏常显 ============ */
 
 .fav-star {
   flex: none;
@@ -430,7 +628,6 @@ body {
   line-height: 1;
   color: #c3c8d0;
   cursor: pointer;
-  /* 平时藏起来，界面更干净；鼠标移到这条上才出现，已收藏的常显 */
   opacity: 0;
   transition: color 0.15s ease, transform 0.1s ease, opacity 0.15s ease;
 }
@@ -453,6 +650,25 @@ body {
   transform: scale(0.85);
 }
 
+/* ============ 收藏入口按钮 ============ */
+
+.fav-entry {
+  border: 1px solid var(--line);
+  background: var(--card);
+  color: var(--text);
+  padding: 9px 16px;
+  border-radius: 999px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.fav-entry:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(230, 57, 79, 0.08);
+}
+
 /* ============ 备注 ============ */
 
 .note-area {
@@ -465,13 +681,17 @@ body {
 .note-text {
   margin: 0;
   font-size: 12.5px;
-  color: #6b7280;
+  color: var(--text-weak);
   background: #f6f7f9;
-  border-left: 3px solid #e6e8ee;
+  border-left: 3px solid var(--line);
   border-radius: 6px;
   padding: 3px 8px;
   max-width: 100%;
   overflow-wrap: anywhere;
+}
+
+.page[data-theme='dark'] .note-text {
+  background: #262a34;
 }
 
 .note-btn {
@@ -479,7 +699,7 @@ body {
   background: none;
   padding: 0;
   font-size: 12.5px;
-  color: #9aa1ab;
+  color: var(--text-faint);
   cursor: pointer;
 }
 
@@ -501,6 +721,7 @@ body {
   padding: 7px 11px;
   font-size: 13px;
   color: var(--text);
+  background: var(--card);
   outline: none;
   transition: border-color 0.15s ease;
 }
@@ -543,7 +764,8 @@ body {
   width: min(620px, 100%);
   max-height: 80vh;
   overflow: auto;
-  background: #fff;
+  background: var(--card);
+  color: var(--text);
   border-radius: 18px;
   padding: 22px 24px;
   box-shadow: var(--shadow-2);
@@ -576,11 +798,11 @@ body {
 
 .modal-head button {
   border: 1px solid var(--line);
-  background: #fff;
+  background: var(--card);
+  color: var(--text);
   border-radius: 999px;
   padding: 6px 15px;
   font-size: 13px;
-  color: var(--text);
   cursor: pointer;
   transition: border-color 0.15s ease, color 0.15s ease;
 }
@@ -611,7 +833,7 @@ body {
   align-items: flex-start;
   gap: 10px;
   padding: 11px 6px;
-  border-bottom: 1px solid #f1f2f6;
+  border-bottom: 1px solid var(--line);
 }
 
 .fav-item:last-child {
@@ -624,7 +846,7 @@ body {
   text-align: center;
   font-size: 13px;
   font-weight: 600;
-  color: #9aa1ab;
+  color: var(--text-faint);
   font-variant-numeric: tabular-nums;
 }
 
@@ -656,13 +878,13 @@ body {
   align-items: flex-end;
   gap: 2px;
   font-size: 11px;
-  color: #9aa1ab;
+  color: var(--text-faint);
 }
 
 .fav-hint {
   margin: 0;
   font-size: 12px;
-  color: #9aa1ab;
+  color: var(--text-faint);
   text-align: center;
 }
 
@@ -701,7 +923,7 @@ body {
   margin-top: 6px;
   border: 1px solid var(--line);
   border-radius: 999px;
-  background: #fff;
+  background: var(--card);
   color: var(--text);
   padding: 8px 24px;
   font-size: 13px;
@@ -723,7 +945,7 @@ body {
 .all-error {
   grid-column: 1 / -1;
   background: var(--card);
-  border: 1px solid #eef0f5;
+  border: 1px solid var(--line);
   border-radius: var(--radius);
   box-shadow: var(--shadow-1);
   padding: 60px 20px;
@@ -746,7 +968,7 @@ body {
   color: var(--text-weak);
 }
 
-/* ============ 骨架屏（加载时的占位轮廓）============ */
+/* ============ 骨架屏 ============ */
 
 .sk {
   border-radius: 8px;
@@ -776,10 +998,349 @@ body {
   margin: 13px 8px;
 }
 
-/* 占位条长短不一，更像真实榜单 */
 .sk-item:nth-child(3n) { width: 82%; }
 .sk-item:nth-child(4n) { width: 64%; }
 .sk-item:nth-child(7n) { width: 72%; }
+
+/* ============ 分类筛选标签（Day 8 第 3 步）============ */
+
+.cat-bar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 18px;
+  padding: 12px 16px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  box-shadow: var(--shadow-1);
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.cat-bar-label {
+  margin-right: 2px;
+  font-size: 12.5px;
+  color: var(--text-faint);
+}
+
+.cat-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-weak);
+  font-size: 13px;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.16s ease;
+}
+
+.cat-pill:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+  transform: translateY(-1px);
+}
+
+.cat-pill.active {
+  background: linear-gradient(135deg, #e6394f, #f0642e);
+  border-color: transparent;
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(230, 57, 79, 0.28);
+}
+
+.cat-count {
+  font-size: 11px;
+  opacity: 0.7;
+}
+
+.cat-reset {
+  margin-left: auto;
+  padding: 5px 12px;
+  border: 1px dashed var(--line);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-faint);
+  font-size: 12px;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.16s ease;
+}
+
+.cat-reset:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+/* ============ 洞察区：词云 + 7 天趋势（Day 8 第 3 步）============ */
+
+.insights {
+  display: grid;
+  grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+  gap: 22px;
+  margin-top: 22px;
+}
+
+.insight-card {
+  min-width: 0;
+  padding: 18px 20px 16px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-1);
+  transition: box-shadow 0.2s ease, background-color 0.3s ease;
+}
+
+.insight-card:hover {
+  box-shadow: var(--shadow-2);
+}
+
+.insight-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.insight-head h3 {
+  margin: 0;
+  font-size: 15.5px;
+  font-weight: 700;
+}
+
+.insight-hint {
+  font-size: 11.5px;
+  color: var(--text-faint);
+  white-space: nowrap;
+}
+
+.insight-note {
+  margin: 12px 0 0;
+  font-size: 11.5px;
+  line-height: 1.65;
+  color: var(--text-faint);
+}
+
+/* --- 词云：字号 = 分类总热度，颜色 = 该分类里条目最多的平台 --- */
+
+.word-cloud {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 10px 14px;
+  min-height: 150px;
+  padding: 10px 4px;
+}
+
+.wc-word {
+  padding: 2px 6px;
+  border: none;
+  border-radius: 12px;
+  background: none;
+  font-family: inherit;
+  font-weight: 700;
+  line-height: 1.15;
+  cursor: pointer;
+  opacity: 0.88;
+  transition: transform 0.16s ease, opacity 0.16s ease, background-color 0.16s ease;
+}
+
+.wc-word:hover {
+  transform: scale(1.08);
+  opacity: 1;
+}
+
+/* 选中的词：描边 + 淡底，和标签栏的 active 是同一个状态 */
+.wc-word.active {
+  opacity: 1;
+  background: rgba(230, 57, 79, 0.1);
+  box-shadow: inset 0 0 0 1.5px currentColor;
+}
+
+.wc-word.douyin {
+  color: #1f2329;
+}
+
+.wc-word.bilibili {
+  color: #fb7299;
+}
+
+.wc-word.baidu {
+  color: #2982eb;
+}
+
+/* 深色模式下抖音的黑色看不见，换浅色 */
+.page[data-theme='dark'] .wc-word.douyin {
+  color: #e8eaf0;
+}
+
+.wc-empty {
+  font-size: 13px;
+  color: var(--text-faint);
+}
+
+/* --- 7 天趋势折线图（手绘 SVG）--- */
+
+.trend-wrap {
+  position: relative;
+}
+
+.trend-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.trend-grid {
+  stroke: var(--line);
+  stroke-width: 1;
+  stroke-dasharray: 3 4;
+}
+
+.trend-tick {
+  fill: var(--text-faint);
+  font-family: inherit;
+  font-size: 10.5px;
+}
+
+.trend-cursor {
+  stroke: var(--text-faint);
+  stroke-width: 1;
+  stroke-dasharray: 3 3;
+}
+
+.trend-line {
+  fill: none;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.trend-line.douyin,
+.trend-dot.douyin {
+  stroke: #1f2329;
+}
+
+.trend-line.bilibili,
+.trend-dot.bilibili {
+  stroke: #fb7299;
+}
+
+.trend-line.baidu,
+.trend-dot.baidu {
+  stroke: #2982eb;
+}
+
+.trend-dot.douyin {
+  fill: #1f2329;
+}
+
+.trend-dot.bilibili {
+  fill: #fb7299;
+}
+
+.trend-dot.baidu {
+  fill: #2982eb;
+}
+
+/* 数据点外圈用卡片底色，线条交叉时看得清 */
+.trend-dot {
+  stroke-width: 1.5;
+  transition: r 0.12s ease;
+}
+
+.page[data-theme='dark'] .trend-dot {
+  stroke: var(--card);
+}
+
+.page[data-theme='dark'] .trend-line.douyin,
+.page[data-theme='dark'] .trend-dot.douyin {
+  stroke: #e8eaf0;
+}
+
+.page[data-theme='dark'] .trend-dot.douyin {
+  fill: #e8eaf0;
+}
+
+.trend-hit {
+  fill: transparent;
+  cursor: crosshair;
+}
+
+.trend-tip {
+  position: absolute;
+  top: 0;
+  z-index: 5;
+  min-width: 118px;
+  padding: 9px 12px;
+  border-radius: 12px;
+  background: rgba(31, 35, 41, 0.94);
+  color: #fff;
+  pointer-events: none;
+  transform: translateX(-50%);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.22);
+}
+
+.trend-tip-day {
+  margin: 0 0 6px;
+  font-size: 11.5px;
+  color: #c9ced8;
+}
+
+.trend-tip-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  font-size: 12.5px;
+  line-height: 1.7;
+}
+
+.trend-tip-row b {
+  margin-left: auto;
+  font-weight: 700;
+}
+
+.tip-dot {
+  display: inline-block;
+  flex: none;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+}
+
+.tip-dot.douyin {
+  background: #1f2329;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.4);
+}
+
+.tip-dot.bilibili {
+  background: #fb7299;
+}
+
+.tip-dot.baidu {
+  background: #2982eb;
+}
+
+.trend-legend {
+  display: flex;
+  justify-content: center;
+  gap: 18px;
+  margin-top: 4px;
+  font-size: 12px;
+  color: var(--text-weak);
+}
+
+.trend-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
 
 /* ============ 页脚与演示开关 ============ */
 
@@ -808,13 +1369,13 @@ body {
   gap: 6px;
   margin-bottom: 8px;
   font-size: 12px;
-  color: #9aa1ab;
+  color: var(--text-faint);
 }
 
 .demo-btn {
   border: 1px solid var(--line);
   border-radius: 999px;
-  background: #fff;
+  background: var(--card);
   color: var(--text-weak);
   padding: 4px 12px;
   font-size: 12px;
@@ -833,24 +1394,41 @@ body {
   color: var(--accent);
 }
 
-/* ============ 手机 / 窄窗口：三栏自动堆叠（PRD 布局 A）============ */
+/* ============ 手机 / 窄窗口：三栏堆叠（PRD 布局 A）============ */
 
 @media (max-width: 900px) {
   .board {
     grid-template-columns: 1fr;
   }
 
-  .brand h1 {
-    font-size: 25px;
+  .stat-cards {
+    grid-template-columns: 1fr;
   }
 
-  /* 手机上吸顶卡占空间，改回普通文档流 */
-  .topbar {
+  .hero-title {
+    font-size: 22px;
+  }
+
+  /* 手机上吸顶占空间，改回普通文档流 */
+  .navbar {
     position: static;
   }
 
   /* 手机没有鼠标悬停，收藏星标常显 */
   .fav-star {
     opacity: 1;
+  }
+
+  /* 词云和趋势图在手机上改成上下堆叠 */
+  .insights {
+    grid-template-columns: 1fr;
+  }
+
+  .cat-reset {
+    margin-left: 0;
+  }
+
+  .word-cloud {
+    min-height: auto;
   }
 }

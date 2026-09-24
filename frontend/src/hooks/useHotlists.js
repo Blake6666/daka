@@ -6,7 +6,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { HOTLISTS } from '../data/hotlistData'
 
-// 演示场景：normal 正常 / weibo-error 微博单榜失败 / all-error 全部失败 / douyin-empty 抖音空榜单
+// 演示场景：normal 正常 / douyin-error 抖音单榜失败 / all-error 全部失败 / bilibili-empty B站空榜单
 export function useHotlists() {
   const [scenario, setScenario] = useState('normal')
   const [state, setState] = useState({ phase: 'loading' })
@@ -20,10 +20,10 @@ export function useHotlists() {
         return
       }
       const lists = HOTLISTS.map((l) => {
-        if (sc === 'weibo-error' && l.platform === 'weibo') {
+        if (sc === 'douyin-error' && l.platform === 'douyin') {
           return { ...l, status: 'error' }
         }
-        if (sc === 'douyin-empty' && l.platform === 'douyin') {
+        if (sc === 'bilibili-empty' && l.platform === 'bilibili') {
           return { ...l, status: 'empty' }
         }
         return { ...l, status: 'ok' }
