@@ -7,7 +7,7 @@
 import { useState, useEffect } from 'react'
 import { useFavorites, favKey } from './hooks/useFavorites'
 import { useHotlists } from './hooks/useHotlists'
-import { TREND_7D } from './data/hotlistData'
+import { TREND_7D, WORD_CLOUD } from './data/hotlistData'
 import WordCloud from './components/WordCloud'
 import TrendChart from './components/TrendChart'
 
@@ -477,12 +477,12 @@ export default function App() {
           <div className="insight-card">
             <div className="insight-head">
               <h3>热搜词云</h3>
-              <span className="insight-hint">点词 = 只看这个分类</span>
+              <span className="insight-hint">点词 = 只看含这个词的热搜</span>
             </div>
-            <WordCloud words={categories} active={category} onPick={setCategory} />
+            <WordCloud words={WORD_CLOUD} active={q} onPick={(text) => setQuery(text)} />
             <p className="insight-note">
-              字号 = 该分类的总热度，颜色 = 这个分类里条目最多的平台。当前是 mock
-              数据，「词」取自条目的分类字段；接真接口后换成真实关键词即可。
+              字号 = 这个词的热度权重，颜色 = 这个词最热的平台，最大的词在正中央、其余从中心向外铺开。当前是
+              mock 数据，「词」从 60 条热搜标题里提炼；接真接口后换成真实关键词即可。
             </p>
           </div>
 

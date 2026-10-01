@@ -93,6 +93,53 @@ export const HOTLISTS = [
 // 7 天趋势（Day 8 第 3 步）—— 同样是 mock 数据
 // 数值含义：当天该平台 TOP20 的总热度，单位「万」。
 // 将来接真 API 后，这里换成云函数每天存的一份快照即可，趋势图代码不用改。
+// 词云词库（Day 10 重做）—— 同样是 mock 数据
+// 来源：从上面 60 条热搜标题里提炼出的关键词，**每个词都真实出现在某条标题中**，
+//       所以点词筛选一定能命中，不会出现「点了没反应」的假词。
+// 字段：weight = 热度权重（0~100），决定字号；platform = 该词最热的平台，决定颜色；
+//       category = 归属分类（保留给以后按分类聚合用）。
+// 权重按真实热搜的「长尾分布」设定——第一名远高于第十名、越往后越密，
+// 这样词云才有一个明确的重心，而不是一堆差不多大的字铺满屏。
+// 第 3 周接真 API 后，这里换成接口返回的关键词列表即可，词云组件不用改。
+export const WORD_CLOUD = [
+  { text: '黑神话', weight: 100, platform: 'bilibili', category: '游戏' },
+  { text: '台风', weight: 82, platform: 'baidu', category: '社会' },
+  { text: '收纳', weight: 71, platform: 'douyin', category: '生活' },
+  { text: '宿舍', weight: 63, platform: 'douyin', category: '生活' },
+  { text: '央行降准', weight: 57, platform: 'baidu', category: '热点事件' },
+  { text: '大飞机', weight: 52, platform: 'douyin', category: '热点事件' },
+  { text: '折叠屏', weight: 48, platform: 'bilibili', category: '科技' },
+  { text: '国考', weight: 45, platform: 'baidu', category: '社会' },
+  { text: '手工耿', weight: 42, platform: 'bilibili', category: '娱乐' },
+  { text: '电竞', weight: 39, platform: 'bilibili', category: '游戏' },
+  { text: '航天员', weight: 37, platform: 'douyin', category: '科技' },
+  { text: '新能源汽车', weight: 35, platform: 'baidu', category: '热点事件' },
+  { text: '罗翔', weight: 33, platform: 'bilibili', category: '社会' },
+  { text: '世界杯预选赛', weight: 31, platform: 'baidu', category: '体育' },
+  { text: 'LPL', weight: 29, platform: 'bilibili', category: '游戏' },
+  { text: '大熊猫', weight: 28, platform: 'baidu', category: '生活' },
+  { text: '非遗漆扇', weight: 27, platform: 'douyin', category: '娱乐' },
+  { text: '国产芯片', weight: 26, platform: 'baidu', category: '科技' },
+  { text: '考研', weight: 25, platform: 'baidu', category: '社会' },
+  { text: '新手机', weight: 24, platform: 'douyin', category: '科技' },
+  { text: '体测', weight: 23, platform: 'douyin', category: '娱乐' },
+  { text: '卫星', weight: 22, platform: 'bilibili', category: '科技' },
+  { text: '演唱会', weight: 21, platform: 'baidu', category: '娱乐' },
+  { text: '男篮', weight: 20, platform: 'douyin', category: '体育' },
+  { text: '虚拟主播', weight: 19, platform: 'bilibili', category: '娱乐' },
+  { text: '马拉松', weight: 18, platform: 'bilibili', category: '体育' },
+  { text: '圆明园', weight: 17, platform: 'bilibili', category: '娱乐' },
+  { text: '降温', weight: 16, platform: 'baidu', category: '生活' },
+  { text: '露营', weight: 15, platform: 'douyin', category: '生活' },
+  { text: '世乒赛', weight: 14, platform: 'bilibili', category: '体育' },
+  { text: '量子计算', weight: 13, platform: 'bilibili', category: '科技' },
+  { text: '黄金周', weight: 12, platform: 'baidu', category: '生活' },
+  { text: '山村教师', weight: 11, platform: 'douyin', category: '社会' },
+  { text: '国风舞蹈', weight: 10, platform: 'bilibili', category: '娱乐' },
+  { text: '古籍修复', weight: 9, platform: 'bilibili', category: '生活' },
+  { text: '快递进村', weight: 8, platform: 'baidu', category: '生活' }
+]
+
 export const TREND_7D = {
   days: ['09-17', '09-18', '09-19', '09-20', '09-21', '09-22', '09-23'],
   series: [

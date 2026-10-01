@@ -1180,31 +1180,32 @@ body.dark {
 
 /* --- 词云：字号 = 分类总热度，颜色 = 该分类里条目最多的平台 --- */
 
+/* Day 10：由「flex 平铺换行」改为「中心辐射式」。
+   词的位置和字号由 JS 算好（见 components/WordCloud.jsx），
+   CSS 只负责给出一块固定高度的画布，并把每个词按算出的坐标钉上去。
+   ⚠️ 这里的高度是布局算法的"地盘"：改小会让词挤不下而被跳过。 */
 .word-cloud {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: center;
-  gap: 10px 14px;
-  min-height: 150px;
-  padding: 10px 4px;
+  position: relative;
+  height: 460px;
+  overflow: hidden;
 }
 
 .wc-word {
-  padding: 4px 8px;
+  position: absolute;
+  padding: 0;
   border: none;
-  border-radius: 12px;
+  border-radius: 10px;
   background: none;
   font-family: inherit;
   font-weight: 700;
-  line-height: 1.15;
+  text-align: center;
+  white-space: nowrap;
   cursor: pointer;
-  opacity: 0.88;
-  transition: transform 0.16s ease, opacity 0.16s ease, background-color 0.16s ease;
+  opacity: 0.9;
+  transition: opacity 0.16s ease, color 0.16s ease;
 }
 
 .wc-word:hover {
-  transform: scale(1.08);
   opacity: 1;
 }
 
@@ -1235,6 +1236,14 @@ body.dark {
 .wc-empty {
   font-size: 13px;
   color: var(--text-faint);
+}
+
+/* Day 10：窄屏下画布加高——词的字号已经会自动变小，再把地盘给足，
+   36 个词才都能落位、不被算法跳过。 */
+@media (max-width: 900px) {
+  .word-cloud {
+    height: 500px;
+  }
 }
 
 /* --- 7 天趋势折线图（手绘 SVG）--- */
@@ -1511,16 +1520,48 @@ body.dark {
     padding: 16px 16px 40px;
   }
 
+  /* ============ Day 10 修复：手机首屏一条热搜都看不到 ============
+     现象：360px 手机上「导航栏 203px + Hero 462px + 分类栏 147px = 812px」，
+           屏幕只有 844px 高，首屏全被头部占满，要滚一整屏才见到第一条热搜
+           （同尺寸下桌面首屏能看到 30 条）。
+     原因：三块在窄屏下都「竖着长高」——导航栏操作区独占一行且按钮折成两行、
+           统计卡竖排三行、分类胶囊换行成三行。
+     范围：只压缩这三块在窄屏下的布局与间距；不动数据、接口、榜单卡片、
+           收藏功能与异常状态；桌面端（>560px）表现完全不变。
+     目标：360px 首屏至少能看到 3~5 条热搜。 */
+
+  /* ---- ① 导航栏 203px → 约 105px：品牌与搜索框同行，按钮另起一行且不折行 ---- */
   .navbar {
-    gap: 12px;
-    padding: 12px 16px;
+    gap: 10px;
+    padding: 10px 14px;
   }
 
+  .nav-logo {
+    font-size: 20px;
+  }
+
+  .nav-name {
+    font-size: 16px;
+  }
+
+  /* 原来 min-width 是 200px，加上品牌就超过 360px 可用宽度，被迫换行；
+     改成可压缩到 140px，就能和品牌挤在同一行 */
+  .nav-search {
+    flex: 1 1 140px;
+    min-width: 0;
+    padding: 8px 14px;
+  }
+
+  /* 独占第二行，但按钮不再折行（原来折两行占 84px） */
   .nav-actions {
     flex: 1 1 100%;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     justify-content: flex-end;
-    min-width: 0;
+  }
+
+  /* 腾位置：「mock 数据」徽标在窄屏隐藏（页面底部脚注有同样的说明文字） */
+  .sample-badge {
+    display: none;
   }
 
   .nav-btn {
@@ -1531,5 +1572,76 @@ body.dark {
   .nav-search-clear::after {
     width: 40px;
     height: 40px;
+  }
+
+  /* ---- ② Hero 462px → 约 240px：统计卡由竖排三行改成「两列 + 跨列一张」 ---- */
+  .hero {
+    padding: 0;
+    margin-bottom: 16px;
+  }
+
+  .hero-sub {
+    margin: 6px 0 12px;
+    font-size: 13px;
+  }
+
+  .stat-cards {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .stat-card {
+    padding: 12px 10px;
+  }
+
+  /* 第三张「热度最高词条」是长标题卡，横跨两列才放得下 */
+  .stat-card.stat-wide {
+    grid-column: 1 / -1;
+    padding: 10px 12px;
+  }
+
+  .stat-num {
+    font-size: 22px;
+  }
+
+  .stat-top-title {
+    font-size: 15px;
+  }
+
+  .stat-label {
+    margin-top: 4px;
+    font-size: 12px;
+  }
+
+  /* ---- ③ 分类栏 147px → 约 50px：由换行三行改成单行横向滚动 ---- */
+  .cat-bar {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    gap: 6px;
+    padding: 10px 12px;
+    margin-bottom: 12px;
+    /* 滚动时隐藏横向滚动条，靠右侧露出的半个胶囊提示「还能往右滑」 */
+    scrollbar-width: thin;
+  }
+
+  .cat-bar > * {
+    /* 不压缩，否则胶囊会被挤扁 */
+    flex: none;
+  }
+
+  /* 「分类」二字固定在左侧，滚动时跟着走会让人不知道这排是什么 */
+  .cat-bar-label {
+    position: sticky;
+    left: 0;
+    z-index: 1;
+    padding-right: 6px;
+    background: var(--card);
+  }
+
+  /* overflow-x 容器右侧的 padding 不生效，用尾部占位补足余量 */
+  .cat-bar::after {
+    content: '';
+    flex: none;
+    width: 6px;
   }
 }
