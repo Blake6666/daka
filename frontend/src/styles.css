@@ -10,11 +10,25 @@
   --card: #ffffff;
   --text: #1f2329;
   --text-weak: #6b7280;
-  --text-faint: #9aa1ab;
+  --text-faint: #666d79;
   --line: #e8eaf0;
   --accent: #e6394f;
   --accent-deep: #d7263d;
   --radius: 18px;
+  /* Day 9 新增：品牌色的「文字版」。
+     原始品牌色当文字用对比度不够（B站粉 2.64:1、百度蓝 3.83:1），
+     文字一律用加深版；当底色 / 边框时仍用原色，保住品牌观感。 */
+  --brand-bili: #fb7299;
+  --brand-bili-text: #d1305a;
+  --brand-baidu: #2982eb;
+  --brand-baidu-text: #1f6fd4;
+  --brand-douyin-text: #161823;
+  /* 栏目标题的渐变字（浅色模式下必须压深才达标） */
+  --grad-douyin: linear-gradient(90deg, #161823, #c81f3f);
+  --grad-bili: linear-gradient(90deg, #d1305a, #c0396b);
+  --grad-baidu: linear-gradient(90deg, #1f6fd4, #1a5cb0);
+  /* 键盘焦点描边（规则 4）：2px 可见环 */
+  --ring: 2px solid #e6394f;
   /* 柔和淡阴影：静止一层、悬停加深 */
   --shadow-1: 0 1px 2px rgba(31, 35, 41, 0.04), 0 8px 24px rgba(31, 35, 41, 0.05);
   --shadow-2: 0 2px 8px rgba(31, 35, 41, 0.07), 0 16px 40px rgba(31, 35, 41, 0.1);
@@ -26,8 +40,15 @@
   --card: #1e2129;
   --text: #e8eaf0;
   --text-weak: #a0a6b1;
-  --text-faint: #7c8290;
+  --text-faint: #949cab;
   --line: #2e323d;
+  /* 深色底上要反过来：用浅色版品牌色才看得见 */
+  --brand-bili-text: #fb7299;
+  --brand-baidu-text: #6aa9f5;
+  --brand-douyin-text: #e8eaf0;
+  --grad-douyin: linear-gradient(90deg, #e8eaf0, #ff5a7a);
+  --grad-bili: linear-gradient(90deg, #fb7299, #e75480);
+  --grad-baidu: linear-gradient(90deg, #4e9af5, #3d90f0);
   --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px rgba(0, 0, 0, 0.35);
   --shadow-2: 0 2px 8px rgba(0, 0, 0, 0.4), 0 16px 40px rgba(0, 0, 0, 0.5);
 }
@@ -123,7 +144,7 @@ body.dark {
   background: #f1f2f6;
   border: 1px solid transparent;
   border-radius: 999px;
-  padding: 9px 16px;
+  padding: 8px 16px;
   transition: border-color 0.15s ease, background-color 0.3s ease;
 }
 
@@ -134,6 +155,9 @@ body.dark {
 .nav-search:focus-within {
   border-color: var(--accent);
   background: var(--card);
+  /* 规则 4：原来只有 1px 边框变色，键盘用户看不出焦点；补 2px 描边 */
+  outline: var(--ring);
+  outline-offset: 2px;
 }
 
 .nav-search-icon {
@@ -146,6 +170,7 @@ body.dark {
   min-width: 0;
   border: none;
   background: none;
+  /* 输入框自身不画描边，焦点环由外层 .nav-search:focus-within 统一画 */
   outline: none;
   font-size: 14px;
   color: var(--text);
@@ -157,6 +182,12 @@ body.dark {
 
 /* 搜索框右侧的清空小按钮（有内容时才出现） */
 .nav-search-clear {
+  /* 规则 4：可点区要够大，但不能把搜索框撑高。
+     做法：按钮本体保持原尺寸，用一个绝对定位的透明层 ::after 撑出 32×32 的
+     可点范围（绝对定位不参与布局，所以搜索框高度不变）。 */
+  position: relative;
+  display: grid;
+  place-items: center;
   flex: none;
   border: none;
   background: none;
@@ -164,7 +195,18 @@ body.dark {
   font-size: 13px;
   cursor: pointer;
   padding: 0 2px;
+  border-radius: 8px;
   line-height: 1;
+}
+
+.nav-search-clear::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 32px;
+  height: 32px;
+  transform: translate(-50%, -50%);
 }
 
 .nav-search-clear:hover {
@@ -174,7 +216,7 @@ body.dark {
 .nav-actions {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   flex: none;
 }
 
@@ -182,7 +224,7 @@ body.dark {
   border: 1px solid var(--line);
   background: var(--card);
   color: var(--text);
-  padding: 9px 16px;
+  padding: 8px 16px;
   border-radius: 999px;
   font-size: 14px;
   cursor: pointer;
@@ -223,7 +265,7 @@ body.dark {
   background: #1f2329;
   color: #fff;
   font-size: 13.5px;
-  padding: 11px 22px;
+  padding: 12px 20px;
   border-radius: 999px;
   box-shadow: 0 8px 28px rgba(15, 18, 25, 0.28);
   z-index: 60;
@@ -292,7 +334,8 @@ body.dark {
   font-size: 30px;
   font-weight: 800;
   font-variant-numeric: tabular-nums;
-  background: linear-gradient(120deg, #d7263d, #f0642e);
+  /* Day 9：原渐变右端 #f0642e 上只有 3.2:1，17px 的「热度最高词条」不达标 */
+  background: linear-gradient(120deg, #d7263d, #c8481a);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -308,7 +351,7 @@ body.dark {
 }
 
 .stat-label {
-  margin: 6px 0 0;
+  margin: 8px 0 0;
   font-size: 12.5px;
   color: var(--text-faint);
 }
@@ -375,21 +418,21 @@ body.dark {
 
 /* 栏目标题用平台色渐变字 */
 .column.douyin .column-head h2 {
-  background: linear-gradient(90deg, #161823, #fe2c55);
+  background: var(--grad-douyin);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
 }
 
 .column.bilibili .column-head h2 {
-  background: linear-gradient(90deg, #fb7299, #e75480);
+  background: var(--grad-bili);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
 }
 
 .column.baidu .column-head h2 {
-  background: linear-gradient(90deg, #4e9af5, #2982eb);
+  background: var(--grad-baidu);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -398,10 +441,10 @@ body.dark {
 .column-hint {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   font-size: 12px;
   color: var(--text-faint);
-  padding: 4px 11px;
+  padding: 4px 12px;
   border-radius: 999px;
   background: #f4f5f8;
   white-space: nowrap;
@@ -440,7 +483,7 @@ body.dark {
   display: flex;
   align-items: flex-start;
   gap: 12px;
-  padding: 9px 10px;
+  padding: 8px 12px;
   border-radius: 12px;
   transition: background-color 0.15s ease, transform 0.15s ease;
 }
@@ -473,7 +516,7 @@ body.dark {
   text-align: center;
   font-size: 14px;
   font-weight: 700;
-  color: #b6bcc7;
+  color: var(--text-faint);
   font-variant-numeric: tabular-nums;
 }
 
@@ -483,21 +526,25 @@ body.dark {
   width: 28px;
   height: 28px;
   line-height: 28px;
-  color: #fff;
   font-size: 13px;
   clip-path: polygon(25% 0, 75% 0, 100% 50%, 75% 100%, 25% 100%, 0 50%);
 }
 
+/* Day 9：奖牌数字原来是白字，压在淡金 / 淡银上只有 1.19~1.82:1（银牌接近隐形）。
+   改成「深色字 + 原有渐变底」，既保住金属质感，又把对比度提到 5:1 以上。 */
 .hot-item .rank.rank-1 {
   background: linear-gradient(135deg, #ffd873, #f5a623);
+  color: #4a2f00;
 }
 
 .hot-item .rank.rank-2 {
   background: linear-gradient(135deg, #e8ecf1, #a9b4c2);
+  color: #2f3640;
 }
 
 .hot-item .rank.rank-3 {
   background: linear-gradient(135deg, #f2b28c, #d97b4a);
+  color: #3a1d08;
 }
 
 .hot-item.top .title {
@@ -509,13 +556,13 @@ body.dark {
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: 4px;
 }
 
 .item-row {
   display: flex;
   align-items: center;
-  gap: 9px;
+  gap: 8px;
   min-width: 0;
 }
 
@@ -541,22 +588,23 @@ body.dark {
   font-size: 11px;
   font-weight: 700;
   line-height: 1;
-  padding: 3px 6px;
-  border-radius: 5px;
+  padding: 4px 8px;
+  border-radius: 4px;
 }
 
 .tag-fei {
   color: #fff;
-  background: linear-gradient(135deg, #ff2442, #ff6a3d);
+  /* Day 9：原渐变右端 #ff6a3d 上白字只有 2.85:1，整体压深一档 */
+  background: linear-gradient(135deg, #d81e35, #c94a12);
 }
 
 .tag-re {
-  color: #f43f5e;
+  color: #c3223c;
   background: #ffe9ec;
 }
 
 .tag-xin {
-  color: #f43f5e;
+  color: #c3223c;
   background: #ffe9ec;
 }
 
@@ -604,7 +652,7 @@ body.dark {
 .view-more {
   display: block;
   text-align: center;
-  padding: 13px 16px;
+  padding: 12px 16px;
   border-top: 1px solid var(--line);
   font-size: 13.5px;
   color: var(--text-faint);
@@ -656,7 +704,7 @@ body.dark {
   border: 1px solid var(--line);
   background: var(--card);
   color: var(--text);
-  padding: 9px 16px;
+  padding: 8px 16px;
   border-radius: 999px;
   font-size: 14px;
   cursor: pointer;
@@ -718,16 +766,19 @@ body.dark {
   min-width: 0;
   border: 1px solid var(--line);
   border-radius: 8px;
-  padding: 7px 11px;
+  padding: 8px 12px;
   font-size: 13px;
   color: var(--text);
   background: var(--card);
+  /* 说明：输入框自身不画环，焦点环在下面的 :focus 里补 */
   outline: none;
   transition: border-color 0.15s ease;
 }
 
 .note-editor input:focus {
   border-color: var(--accent);
+  outline: var(--ring);
+  outline-offset: 1px;
 }
 
 .note-editor button {
@@ -736,7 +787,7 @@ body.dark {
   background: var(--accent);
   color: #fff;
   font-size: 12.5px;
-  padding: 7px 13px;
+  padding: 8px 12px;
   cursor: pointer;
 }
 
@@ -920,7 +971,7 @@ body.dark {
 }
 
 .retry-btn {
-  margin-top: 6px;
+  margin-top: 8px;
   border: 1px solid var(--line);
   border-radius: 999px;
   background: var(--card);
@@ -1019,7 +1070,7 @@ body.dark {
 }
 
 .cat-bar-label {
-  margin-right: 2px;
+  margin-right: 4px;
   font-size: 12.5px;
   color: var(--text-faint);
 }
@@ -1027,8 +1078,8 @@ body.dark {
 .cat-pill {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 6px 14px;
+  gap: 8px;
+  padding: 8px 12px;
   border: 1px solid var(--line);
   border-radius: 999px;
   background: transparent;
@@ -1046,7 +1097,8 @@ body.dark {
 }
 
 .cat-pill.active {
-  background: linear-gradient(135deg, #e6394f, #f0642e);
+  /* Day 9：原渐变右端 #f0642e 上白字只有 3.2:1，13px 小字不达标 */
+  background: linear-gradient(135deg, #c62b42, #b3491a);
   border-color: transparent;
   color: #fff;
   box-shadow: 0 4px 14px rgba(230, 57, 79, 0.28);
@@ -1054,12 +1106,13 @@ body.dark {
 
 .cat-count {
   font-size: 11px;
-  opacity: 0.7;
+  /* Day 9：0.7 透明度把白字压到 3.3:1，取消透明度让计数也达标 */
+  opacity: 1;
 }
 
 .cat-reset {
   margin-left: auto;
-  padding: 5px 12px;
+  padding: 4px 12px;
   border: 1px dashed var(--line);
   border-radius: 999px;
   background: transparent;
@@ -1138,7 +1191,7 @@ body.dark {
 }
 
 .wc-word {
-  padding: 2px 6px;
+  padding: 4px 8px;
   border: none;
   border-radius: 12px;
   background: none;
@@ -1163,20 +1216,20 @@ body.dark {
 }
 
 .wc-word.douyin {
-  color: #1f2329;
+  color: var(--brand-douyin-text);
 }
 
 .wc-word.bilibili {
-  color: #fb7299;
+  color: var(--brand-bili-text);
 }
 
 .wc-word.baidu {
-  color: #2982eb;
+  color: var(--brand-baidu-text);
 }
 
 /* 深色模式下抖音的黑色看不见，换浅色 */
 .page[data-theme='dark'] .wc-word.douyin {
-  color: #e8eaf0;
+  color: var(--brand-douyin-text);
 }
 
 .wc-empty {
@@ -1391,7 +1444,23 @@ body.dark {
 .demo-btn.active {
   background: #fdeef0;
   border-color: var(--accent);
-  color: var(--accent);
+  color: #c3223c;
+}
+
+
+/* ============ Day 9 新增：键盘焦点统一 2px 可见环（规则 4）============
+   原来按钮只有浏览器默认的细描边，搜索框只有 1px 边框变色，
+   用 Tab 键操作时看不出自己停在哪儿。 */
+.nav-btn:focus-visible,
+.nav-search-clear:focus-visible,
+.cat-pill:focus-visible,
+.cat-reset:focus-visible,
+.demo-btn:focus-visible,
+.retry-btn:focus-visible,
+.wc-word:focus-visible,
+.fav-entry:focus-visible {
+  outline: var(--ring);
+  outline-offset: 2px;
 }
 
 /* ============ 手机 / 窄窗口：三栏堆叠（PRD 布局 A）============ */
@@ -1430,5 +1499,37 @@ body.dark {
 
   .word-cloud {
     min-height: auto;
+  }
+}
+
+/* ============ Day 9 修复：390px 手机宽度横向溢出 11px ============
+   原因：导航栏右侧操作区（刷新 / 主题 / 我的收藏）是 flex: none，
+   宽度固定约 356px，塞不进 390px 屏幕的有效宽度，把整个页面顶宽了。
+   修法：窄屏下让操作区独占一行并允许按钮换行，同时把页面左右留白收到 16px。 */
+@media (max-width: 560px) {
+  .page {
+    padding: 16px 16px 40px;
+  }
+
+  .navbar {
+    gap: 12px;
+    padding: 12px 16px;
+  }
+
+  .nav-actions {
+    flex: 1 1 100%;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    min-width: 0;
+  }
+
+  .nav-btn {
+    padding: 8px 12px;
+  }
+
+  /* 手机手指比鼠标粗，可点区提到 40×40（规则 4），同样不影响布局 */
+  .nav-search-clear::after {
+    width: 40px;
+    height: 40px;
   }
 }
