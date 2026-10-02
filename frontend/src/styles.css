@@ -685,6 +685,115 @@ body.dark {
   opacity: 1;
 }
 
+/* ============ Day 11：复制标题按钮（有反馈的交互） ============ */
+/* 与 .fav-star 同款的出现逻辑：桌面悬停/键盘聚焦才出现，手机常显 */
+.copy-btn {
+  position: relative;
+  flex: none;
+  border: none;
+  background: none;
+  padding: 0;
+  font-size: 15px;
+  line-height: 1;
+  color: var(--text-faint);
+  cursor: pointer;
+  opacity: 0;
+  transition: color 0.15s ease, transform 0.1s ease, opacity 0.15s ease;
+}
+
+.hot-item:hover .copy-btn,
+.hot-item:focus-within .copy-btn,
+.copy-btn.ok,
+.copy-btn.fail {
+  opacity: 1;
+}
+
+.copy-btn:hover {
+  color: var(--accent);
+}
+
+.copy-btn:active {
+  transform: scale(0.85);
+}
+
+/* 规则 4：本体只有约 21×15px，用绝对定位透明层把可点区撑到 32×32
+   （不参与布局，视觉大小不变——Day 9 验证过的做法） */
+.copy-btn::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 32px;
+  height: 32px;
+  transform: translate(-50%, -50%);
+}
+
+/* 处理中：禁用防连点，指针变等待 */
+.copy-btn:disabled {
+  cursor: wait;
+  opacity: 1;
+}
+
+/* 成功：绿色 + 弹跳（色值过 Day 9 的对比度标准，≥4.5:1） */
+.copy-btn.ok {
+  color: #0a7a43;
+  animation: copy-pop 0.3s ease;
+}
+
+/* 失败：红色 + 抖动 */
+.copy-btn.fail {
+  color: #c0392b;
+  animation: copy-shake 0.3s ease;
+}
+
+/* 深色模式：底色变黑后，绿/红要换成亮色版才看得清（规则 1.2 对比度） */
+.page[data-theme='dark'] .copy-btn.ok {
+  color: #4cc38a;
+}
+
+.page[data-theme='dark'] .copy-btn.fail {
+  color: #ef8a7f;
+}
+
+@keyframes copy-pop {
+  0% { transform: scale(0.6); }
+  60% { transform: scale(1.25); }
+  100% { transform: scale(1); }
+}
+
+@keyframes copy-shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-3px); }
+  50% { transform: translateX(3px); }
+  75% { transform: translateX(-2px); }
+}
+
+/* 结果气泡：浮在按钮上方，不挤占行内布局 */
+.copy-bubble {
+  position: absolute;
+  bottom: calc(100% + 6px);
+  right: -6px;
+  z-index: 5;
+  white-space: nowrap;
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: 8px;
+  color: #fff;
+  background: #2b303b;
+  box-shadow: var(--shadow-1);
+  animation: copy-rise 0.18s ease;
+  pointer-events: none;
+}
+
+.copy-btn.fail .copy-bubble {
+  background: #8f2f2f;
+}
+
+@keyframes copy-rise {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 .fav-star:hover {
   color: var(--accent);
   transform: scale(1.15);
@@ -1467,7 +1576,8 @@ body.dark {
 .demo-btn:focus-visible,
 .retry-btn:focus-visible,
 .wc-word:focus-visible,
-.fav-entry:focus-visible {
+.fav-entry:focus-visible,
+.copy-btn:focus-visible {
   outline: var(--ring);
   outline-offset: 2px;
 }
@@ -1495,6 +1605,16 @@ body.dark {
   /* 手机没有鼠标悬停，收藏星标常显 */
   .fav-star {
     opacity: 1;
+  }
+
+  /* 复制按钮同理，手机上常显；手指比鼠标粗，可点区提到 40×40 */
+  .copy-btn {
+    opacity: 1;
+  }
+
+  .copy-btn::after {
+    width: 40px;
+    height: 40px;
   }
 
   /* 词云和趋势图在手机上改成上下堆叠 */

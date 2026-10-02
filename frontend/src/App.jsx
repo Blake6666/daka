@@ -10,6 +10,7 @@ import { useHotlists } from './hooks/useHotlists'
 import { TREND_7D, WORD_CLOUD } from './data/hotlistData'
 import WordCloud from './components/WordCloud'
 import TrendChart from './components/TrendChart'
+import CopyButton from './components/CopyButton'
 
 // 演示开关的选项（开发/验收用，让异常状态可以被亲眼看到）
 const SCENARIOS = [
@@ -394,6 +395,8 @@ export default function App() {
                                     </span>
                                   )}
                                   <span className="heat">{item.heat}</span>
+                                  {/* Day 11：复制标题 —— 有反馈的交互（成功/失败/处理中都在按钮上） */}
+                                  <CopyButton text={item.title} />
                                   <button
                                     className={isFav ? 'fav-star active' : 'fav-star'}
                                     type="button"
