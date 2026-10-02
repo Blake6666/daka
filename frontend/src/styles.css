@@ -1164,6 +1164,44 @@ body.dark {
 
 /* ============ 分类筛选标签（Day 8 第 3 步）============ */
 
+/* ============ Day 12：平台筛选栏 ============
+   外观与分类栏（.cat-bar）一致，只把下边距收窄（两栏叠放）；
+   胶囊直接复用 .cat-pill（对比度/焦点态/悬停都已按设计规则达标） */
+.plat-bar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 10px;
+  padding: 12px 16px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  box-shadow: var(--shadow-1);
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+/* 平台品牌色圆点（纯装饰，aria-hidden）。
+   抖音的黑在深色模式下看不清，用 --text 变量（浅色≈黑、深色≈白）自动换 */
+.plat-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex: none;
+}
+
+.plat-dot.douyin {
+  background: var(--text);
+}
+
+.plat-dot.bilibili {
+  background: var(--brand-bili);
+}
+
+.plat-dot.baidu {
+  background: var(--brand-baidu);
+}
+
 .cat-bar {
   display: flex;
   align-items: center;
@@ -1734,7 +1772,9 @@ body.dark {
   }
 
   /* ---- ③ 分类栏 147px → 约 50px：由换行三行改成单行横向滚动 ---- */
-  .cat-bar {
+  /* Day 12：平台筛选栏（只有 4 个胶囊，照样单行滚动，窄屏不堆高） */
+  .cat-bar,
+  .plat-bar {
     flex-wrap: nowrap;
     overflow-x: auto;
     gap: 6px;
@@ -1744,7 +1784,8 @@ body.dark {
     scrollbar-width: thin;
   }
 
-  .cat-bar > * {
+  .cat-bar > *,
+  .plat-bar > * {
     /* 不压缩，否则胶囊会被挤扁 */
     flex: none;
   }
@@ -1759,7 +1800,8 @@ body.dark {
   }
 
   /* overflow-x 容器右侧的 padding 不生效，用尾部占位补足余量 */
-  .cat-bar::after {
+  .cat-bar::after,
+  .plat-bar::after {
     content: '';
     flex: none;
     width: 6px;

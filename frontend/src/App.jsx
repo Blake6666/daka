@@ -2,6 +2,7 @@
 // 本步点亮导航栏三个控件：① 搜索框实时筛选三榜 ② 刷新按钮（旋转动画+成功提示）
 // ③ 深/浅色切换（平滑过渡 + localStorage 记忆，下次打开保持）。
 // Day 8 第 3 步：内容区补齐——分类筛选标签、热搜词云（点词筛选）、7 天趋势折线图。
+// Day 12：平台筛选——新增「平台」筛选栏（全部/抖音/B站/百度），与搜索、分类叠加生效。
 // 骨架（第 1 步）、收藏备注、四种页面状态、异常演示开关全部保留。
 
 import { useState, useEffect } from 'react'
@@ -34,6 +35,13 @@ const TAG_STYLE = { 沸: 'fei', 热: 're', 新: 'xin' }
 // 骨架屏占位平台
 const SKELETON_PLATFORMS = ['douyin', 'bilibili', 'baidu']
 
+// Day 12：平台筛选的选项（key 对应 lists 里的 platform 字段）
+const PLATFORMS = [
+  { key: 'douyin', name: '抖音' },
+  { key: 'bilibili', name: 'B站' },
+  { key: 'baidu', name: '百度' }
+]
+
 // 深色模式在 localStorage 里的钥匙（刷新页面后记住你的选择）
 const THEME_KEY = 'daka_theme'
 
@@ -59,6 +67,10 @@ export default function App() {
   // ===== 第 3 步新增：分类筛选 =====
   // '全部' = 不筛；否则只看这个分类。词云点词也是改这里，所以两个入口天然同步。
   const [category, setCategory] = useState('全部')
+
+  // ===== Day 12 新增：平台筛选 =====
+  // 'all' = 三榜并列；否则只显示所选平台的榜单（其他两栏整个隐藏）。
+  const [platform, setPlatform] = useState('all')
 
   // 主题变化：写进 localStorage + 给 body 挂深色类（控制页面底色）
   useEffect(() => {
@@ -110,9 +122,9 @@ export default function App() {
     }
   }
 
-  // 搜索 + 分类：两个条件是「并且」关系（既输了关键词、又点了分类标签时同时生效）
+  // 搜索 + 分类 + 平台：三个条件是「并且」关系（同时设置时同时生效）
   const q = query.trim()
-  const filtering = !!q || category !== '全部'
+  const filtering = !!q || category !== '全部' || platform !== 'all'
   // 给「本榜没有…」提示拼一句人话，说明到底是哪个条件筛空的
   const condText = [
     q && `含「${q}」`,
@@ -120,17 +132,28 @@ export default function App() {
   ]
     .filter(Boolean)
     .join(' 且 ')
-  const visibleLists = safeLists.map((list) => {
-    if (list.status !== 'ok') return list
-    return {
-      ...list,
-      items: list.items.filter(
-        (it) =>
-          (!q || it.title.includes(q)) &&
-          (category === '全部' || it.category === category)
-      )
-    }
-  })
+  const visibleLists = safeLists
+    // Day 12：平台筛选先在「栏」这一层生效——没选中的平台整栏不渲染
+    .filter((list) => platform === 'all' || list.platform === platform)
+    .map((list) => {
+      if (list.status !== 'ok') return list
+      return {
+        ...list,
+        items: list.items.filter(
+          (it) =>
+            (!q || it.title.includes(q)) &&
+            (category === '全部' || it.category === category)
+        )
+      }
+    })
+
+  // Day 12：每个平台当前正常加载的条数（异常演示切到"单榜失败"等场景时会变），
+  // 给平台筛选胶囊的条数徽标用
+  const platCount = {}
+  for (const l of safeLists) {
+    if (l.status !== 'ok') continue
+    platCount[l.platform] = (platCount[l.platform] || 0) + l.items.length
+  }
 
   // 分类统计：从原始数据（不是筛选后的）算每个分类的条数、总热度、主导平台
   // → 给分类标签的条数徽标、词云的字号和颜色用
@@ -252,6 +275,33 @@ export default function App() {
       )}
 
       {/* ============ 三卡片榜单区 ============ */}
+      {/* Day 12：平台筛选栏——先按平台筛（整栏隐藏），复用分类胶囊的样式与焦点态 */}
+      {phase === 'ok' && (
+        <div className="plat-bar">
+          <span className="cat-bar-label">平台</span>
+          <button
+            type="button"
+            className={platform === 'all' ? 'cat-pill active' : 'cat-pill'}
+            onClick={() => setPlatform('all')}
+          >
+            全部
+            <span className="cat-count">{totalItems}</span>
+          </button>
+          {PLATFORMS.map((p) => (
+            <button
+              key={p.key}
+              type="button"
+              className={platform === p.key ? 'cat-pill active' : 'cat-pill'}
+              onClick={() => setPlatform(platform === p.key ? 'all' : p.key)}
+            >
+              <span className={`plat-dot ${p.key}`} aria-hidden="true" />
+              {p.name}
+              <span className="cat-count">{platCount[p.key] ?? 0}</span>
+            </button>
+          ))}
+        </div>
+      )}
+
       {/* 分类筛选标签（第 3 步）：和词云点词共用同一个状态，点哪边另一边也会亮 */}
       {phase === 'ok' && categories.length > 0 && (
         <div className="cat-bar">
@@ -282,6 +332,7 @@ export default function App() {
               onClick={() => {
                 setCategory('全部')
                 setQuery('')
+                setPlatform('all')
               }}
             >
               清空筛选
@@ -567,7 +618,7 @@ export default function App() {
           ))}
         </div>
         <p>
-          mock 数据版本（Day 8 · 搜索/刷新/深浅色 + 分类筛选 + 词云 + 7 天趋势）｜点击标题跳转原平台｜收藏和备注保存在你自己的浏览器里，无需注册
+          mock 数据版本（Day 8~12 · 搜索/刷新/深浅色 + 分类/平台筛选 + 词云 + 7 天趋势）｜点击标题跳转原平台｜收藏和备注保存在你自己的浏览器里，无需注册
         </p>
       </footer>
     </div>
