@@ -102,6 +102,7 @@ export default function PlatformView({ hot, platform, fav }) {
                   {/* 点标题进「详情页」——三级页面的入口就靠这一行 */}
                   <a
                     className="pv-title"
+                    title="点标题看这条热搜的站内详情，原平台链接在详情页里"
                     href={`#/item/${platform}/${item.rank}`}
                     onClick={(e) => {
                       e.preventDefault()

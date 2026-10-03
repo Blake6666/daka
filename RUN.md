@@ -119,6 +119,8 @@ daka/
 ├── PRD.md                   Day 4 产品需求（v1.1，Day 13 按流程登记过两处翻案）
 ├── TECH_DESIGN.md           Day 5 技术设计
 ├── DESIGN_RULES.md          Day 9 界面设计规则（改界面先对照它）
+├── TEST_CHECKLIST.md        Day 14 轻量用户测试清单（发给同伴看的那份）
+├── TEST_RECORD.md           Day 14 测试记录存档（自测已填，真人部分待填）
 ├── AGENTS.md                项目协作规则
 └── RUN.md                   本文件
 ```

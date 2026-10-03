@@ -578,6 +578,32 @@ body.dark {
   transition: color 0.15s ease;
 }
 
+/* ============ Day 14 用户测试修复：标题的「可点」提示 ============
+   测试发现（自测 6 个任务，卡在第 4 步）：点标题之前完全看不出点了会跳到哪。
+   href 是站内地址 #/item/...，页面上也没任何说明 —— 第一次来的人会以为是跳去
+   抖音官网，结果还在本站，于是怀疑「我操作错了 / 网站坏了」。
+   修法（只改提示，不改行为）：标题末尾加一个 › 箭头，并在 title 属性里写清
+   「点标题看站内详情，原平台链接在详情页里」。悬停/键盘聚焦时箭头变红，
+   让「这是个可以进去看看的东西」在点之前就成立。 */
+.hot-item .title::after {
+  content: '›';
+  margin-left: 4px;
+  color: var(--text-faint);
+  font-size: 14px;
+  transition: color 0.15s ease, transform 0.15s ease;
+}
+
+.hot-item .title:hover::after {
+  color: var(--accent);
+  transform: translateX(2px);
+}
+
+.hot-item .title:focus-visible {
+  outline: var(--ring);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
 .hot-item .title:hover {
   color: var(--accent);
 }
@@ -2166,6 +2192,20 @@ body.dark {
   color: var(--text);
   text-decoration: none;
   word-break: break-all;
+}
+
+/* Day 14 用户测试修复：与首页一致，标题末尾加 › 箭头，
+   让「点进去能看到别的东西」在点之前就成立（原因见 .hot-item .title::after 的注释） */
+.pv-title::after {
+  content: '›';
+  margin-left: 4px;
+  color: var(--text-faint);
+  font-size: 14px;
+  transition: color 0.15s ease;
+}
+
+.pv-title:hover::after {
+  color: var(--accent);
 }
 
 .pv-title:hover {

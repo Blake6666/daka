@@ -304,7 +304,7 @@ export default function HomeView({ hot, query, setQuery, fav }) {
                             <li
                               className={item.rank <= 3 ? 'hot-item top' : 'hot-item'}
                               key={item.rank}
-                              title={`${item.source}热搜第 ${item.rank} 名 · ${item.category} · 点击查看详情`}
+                              title={`${item.source}热搜第 ${item.rank} 名 · ${item.category} · 点标题看站内详情，原平台链接在详情页里`}
                             >
                               <span
                                 className={
