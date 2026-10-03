@@ -810,6 +810,9 @@ body.dark {
 /* ============ 收藏入口按钮 ============ */
 
 .fav-entry {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   border: 1px solid var(--line);
   background: var(--card);
   color: var(--text);
@@ -824,6 +827,26 @@ body.dark {
   border-color: var(--accent);
   color: var(--accent);
   box-shadow: 0 0 0 3px rgba(230, 57, 79, 0.08);
+}
+
+/* Day 13 补上 PRD 第 5 节要求的「已收藏数量小角标」。
+   规则自查：12px 字号（8 档里最小那档）、margin 4px（4 的倍数）、
+   白字压 --accent-deep #d7263d = 4.96:1（达正文 4.5:1 底线，
+   不用 --accent #e6394f 是因为那个只有 4.15:1）。 */
+.fav-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  margin-left: 4px;
+  padding: 0 4px;
+  border-radius: 999px;
+  background: var(--accent-deep);
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1;
 }
 
 /* ============ 备注 ============ */

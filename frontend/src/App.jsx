@@ -161,6 +161,13 @@ export default function App() {
           </button>
           <button className="fav-entry" type="button" onClick={() => setPanelOpen(true)}>
             ★ 我的收藏
+            {/* PRD 第 5 节要求：入口带「已收藏数量」的小角标。
+                没收藏时不显示（显示 0 反而像在催你收藏）；有收藏时用红底白字。 */}
+            {count > 0 && (
+              <span className="fav-count" aria-label={`已收藏 ${count} 条`}>
+                {count}
+              </span>
+            )}
           </button>
         </div>
 
