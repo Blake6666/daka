@@ -1,76 +1,57 @@
-// Day 8 第 2 步：交互层接通
-// 本步点亮导航栏三个控件：① 搜索框实时筛选三榜 ② 刷新按钮（旋转动画+成功提示）
-// ③ 深/浅色切换（平滑过渡 + localStorage 记忆，下次打开保持）。
-// Day 8 第 3 步：内容区补齐——分类筛选标签、热搜词云（点词筛选）、7 天趋势折线图。
-// Day 12：平台筛选——新增「平台」筛选栏（全部/抖音/B站/百度），与搜索、分类叠加生效。
-// 骨架（第 1 步）、收藏备注、四种页面状态、异常演示开关全部保留。
+// Day 13：App.jsx 从「什么都装」瘦成「外壳」——只负责三件事
+//   ① 顶栏（品牌 / 搜索 / 刷新 / 深浅色 / 收藏入口 + 三个视图的切换按钮）
+//   ② 根据地址决定显示哪个视图（路由出口）
+//   ③ 全站共用的东西：我的收藏面板、页脚、异常演示开关
+// 页面内容全部搬到 src/views/ 下的三个文件里了。
 
 import { useState, useEffect } from 'react'
 import { useFavorites, favKey } from './hooks/useFavorites'
 import { useHotlists } from './hooks/useHotlists'
-import { TREND_7D, WORD_CLOUD } from './data/hotlistData'
-import WordCloud from './components/WordCloud'
-import TrendChart from './components/TrendChart'
 import CopyButton from './components/CopyButton'
+import { NotFoundState } from './components/StateBlock'
+import { useHashRoute, navigate } from './router'
+import HomeView from './views/HomeView'
+import PlatformView from './views/PlatformView'
+import ItemView from './views/ItemView'
 
 // 演示开关的选项（开发/验收用，让异常状态可以被亲眼看到）
+// Day 13 新增「卡在加载」：正常加载只有 400ms，来不及截图，这一档会一直停在加载态
 const SCENARIOS = [
   { key: 'normal', label: '正常' },
+  { key: 'loading-stuck', label: '卡在加载' },
   { key: 'douyin-error', label: '单榜失败' },
   { key: 'all-error', label: '全部失败' },
   { key: 'bilibili-empty', label: '空榜单' }
 ]
 
-// 把 "482万" 这样的热度文字换算成可比较的数字（用于热度条比例和统计）
-const heatNum = (h) => {
-  const m = String(h).match(/([\d.]+)/)
-  if (!m) return 0
-  const n = parseFloat(m[1])
-  return String(h).includes('亿') ? n * 10000 : n
-}
-
-// 热搜标签的样式映射：沸=红底爆点，热/新=粉底红字
-const TAG_STYLE = { 沸: 'fei', 热: 're', 新: 'xin' }
-
-// 骨架屏占位平台
-const SKELETON_PLATFORMS = ['douyin', 'bilibili', 'baidu']
-
-// Day 12：平台筛选的选项（key 对应 lists 里的 platform 字段）
-const PLATFORMS = [
-  { key: 'douyin', name: '抖音' },
-  { key: 'bilibili', name: 'B站' },
-  { key: 'baidu', name: '百度' }
+// 顶栏的三个视图入口（清单要求的「可访问的导航标签」，键盘 Tab 能走到）
+const VIEWS = [
+  { key: 'home', label: '首页', hash: '/' },
+  { key: 'platform', label: '平台榜单', hash: '/platform/douyin' },
+  { key: 'item', label: '热搜详情', hash: '/item/douyin/1' }
 ]
 
 // 深色模式在 localStorage 里的钥匙（刷新页面后记住你的选择）
 const THEME_KEY = 'daka_theme'
 
 export default function App() {
-  const { favorites, isFavorited, toggle, setNote, count } = useFavorites()
-  const { phase, lists, updatedAt, scenario, switchScenario, retry } = useHotlists()
+  const fav = useFavorites()
+  const { favorites, count } = fav
+  const hot = useHotlists()
+  const { phase, scenario, switchScenario, retry } = hot
+  const route = useHashRoute()
   const [panelOpen, setPanelOpen] = useState(false)
-  const [editing, setEditing] = useState(null)
 
-  // ===== 第 2 步新增的三个交互状态 =====
-  const [query, setQuery] = useState('') // 搜索关键词
+  const [query, setQuery] = useState('')
   const [theme, setTheme] = useState(() => {
-    // 打开页面时读上次的选择，没选过默认浅色
     try {
       return localStorage.getItem(THEME_KEY) || 'light'
     } catch {
       return 'light'
     }
   })
-  const [toast, setToast] = useState('') // 刷新成功提示文字
-  const [toastPending, setToastPending] = useState(false) // 是否在等待刷新完成
-
-  // ===== 第 3 步新增：分类筛选 =====
-  // '全部' = 不筛；否则只看这个分类。词云点词也是改这里，所以两个入口天然同步。
-  const [category, setCategory] = useState('全部')
-
-  // ===== Day 12 新增：平台筛选 =====
-  // 'all' = 三榜并列；否则只显示所选平台的榜单（其他两栏整个隐藏）。
-  const [platform, setPlatform] = useState('all')
+  const [toast, setToast] = useState('')
+  const [toastPending, setToastPending] = useState(false)
 
   // 主题变化：写进 localStorage + 给 body 挂深色类（控制页面底色）
   useEffect(() => {
@@ -99,86 +80,33 @@ export default function App() {
     retry()
   }
 
-  const startEdit = (platform, rank, currentNote) => {
-    setEditing({ platform, rank, value: currentNote || '' })
-  }
-
-  const saveEdit = () => {
-    if (!editing) return
-    setNote(editing.platform, editing.rank, editing.value)
-    setEditing(null)
-  }
+  // 换页面时把滚动位置拉回顶部，不然从第 20 条点进详情会停在半空
+  useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [route.name, route.params.platform, route.params.rank])
 
   const favList = Object.entries(favorites)
-  // 注意：加载中和失败时 lists 还不存在，必须给空数组兜底（否则白屏，Day 7 踩过）
-  const safeLists = lists || []
-  const totalItems = safeLists.reduce((sum, l) => sum + l.items.length, 0)
 
-  // Hero 统计卡 ③：全网热度最高词条（从 mock 数据里算出来）
-  let topItem = null
-  for (const l of safeLists) {
-    for (const it of l.items) {
-      if (!topItem || heatNum(it.heat) > heatNum(topItem.heat)) topItem = it
+  // ===== 路由出口：根据地址渲染对应视图 =====
+  const view = (() => {
+    if (route.name === 'home') {
+      return <HomeView hot={hot} query={query} setQuery={setQuery} fav={fav} />
     }
-  }
-
-  // 搜索 + 分类 + 平台：三个条件是「并且」关系（同时设置时同时生效）
-  const q = query.trim()
-  const filtering = !!q || category !== '全部' || platform !== 'all'
-  // 给「本榜没有…」提示拼一句人话，说明到底是哪个条件筛空的
-  const condText = [
-    q && `含「${q}」`,
-    category !== '全部' && `属于「${category}」`
-  ]
-    .filter(Boolean)
-    .join(' 且 ')
-  const visibleLists = safeLists
-    // Day 12：平台筛选先在「栏」这一层生效——没选中的平台整栏不渲染
-    .filter((list) => platform === 'all' || list.platform === platform)
-    .map((list) => {
-      if (list.status !== 'ok') return list
-      return {
-        ...list,
-        items: list.items.filter(
-          (it) =>
-            (!q || it.title.includes(q)) &&
-            (category === '全部' || it.category === category)
-        )
-      }
-    })
-
-  // Day 12：每个平台当前正常加载的条数（异常演示切到"单榜失败"等场景时会变），
-  // 给平台筛选胶囊的条数徽标用
-  const platCount = {}
-  for (const l of safeLists) {
-    if (l.status !== 'ok') continue
-    platCount[l.platform] = (platCount[l.platform] || 0) + l.items.length
-  }
-
-  // 分类统计：从原始数据（不是筛选后的）算每个分类的条数、总热度、主导平台
-  // → 给分类标签的条数徽标、词云的字号和颜色用
-  const catMap = {}
-  for (const l of safeLists) {
-    if (l.status !== 'ok') continue
-    for (const it of l.items) {
-      if (!catMap[it.category]) {
-        catMap[it.category] = { text: it.category, count: 0, heat: 0, byPlatform: {} }
-      }
-      const c = catMap[it.category]
-      c.count += 1
-      c.heat += heatNum(it.heat)
-      c.byPlatform[l.platform] = (c.byPlatform[l.platform] || 0) + 1
+    if (route.name === 'platform') {
+      return <PlatformView hot={hot} platform={route.params.platform} fav={fav} />
     }
-  }
-  // 按总热度从高到低排：热门的分类自然排在标签栏和词云前面
-  const categories = Object.values(catMap)
-    .map((c) => ({
-      ...c,
-      heat: Math.round(c.heat),
-      // 这个分类里条目最多的平台，决定词云里这个词的颜色
-      platform: Object.entries(c.byPlatform).sort((a, b) => b[1] - a[1])[0][0]
-    }))
-    .sort((a, b) => b.heat - a.heat)
+    if (route.name === 'item') {
+      return (
+        <ItemView
+          hot={hot}
+          platform={route.params.platform}
+          rank={route.params.rank}
+          fav={fav}
+        />
+      )
+    }
+    return <NotFoundState path={window.location.hash} onHome={() => navigate('/')} />
+  })()
 
   return (
     <div className="page" data-theme={theme}>
@@ -197,7 +125,7 @@ export default function App() {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
           />
-          {q && (
+          {query && (
             <button
               className="nav-search-clear"
               type="button"
@@ -235,324 +163,39 @@ export default function App() {
             ★ 我的收藏
           </button>
         </div>
-      </header>
 
-      {/* ============ Hero 区：简介 + 统计面板 ============ */}
-      <section className="hero">
-        <h2 className="hero-title">一站式查看抖音、B站、百度实时热搜</h2>
-        <p className="hero-sub">三个平台的热点榜单聚合在一页，点击任意条目跳转原平台原文</p>
-        <div className="stat-cards">
-          <div className="stat-card">
-            <p className="stat-num">{phase === 'ok' ? totalItems : '--'}</p>
-            <p className="stat-label">实时总热搜数</p>
-          </div>
-          <div className="stat-card">
-            <p className="stat-num">{phase === 'ok' ? '18' : '--'}</p>
-            <p className="stat-label">今日新增条数</p>
-          </div>
-          <div className="stat-card stat-wide">
-            <p className="stat-num stat-top-title">
-              {phase === 'ok' && topItem ? topItem.title : '--'}
-            </p>
-            <p className="stat-label">
-              热度最高词条{phase === 'ok' && topItem ? ` · ${topItem.source} · ${topItem.heat}` : ''}
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* ============ 全部失败：统一提示（PRD 第 7 节第 2 行） ============ */}
-      {phase === 'all-error' && (
-        <main className="board">
-          <div className="all-error">
-            <p className="all-error-title">网络开小差了</p>
-            <p className="all-error-text">暂时获取不到榜单数据，请检查网络后再试</p>
-            <button className="retry-btn" type="button" onClick={retry}>
-              重试
-            </button>
-          </div>
-        </main>
-      )}
-
-      {/* ============ 三卡片榜单区 ============ */}
-      {/* Day 12：平台筛选栏——先按平台筛（整栏隐藏），复用分类胶囊的样式与焦点态 */}
-      {phase === 'ok' && (
-        <div className="plat-bar">
-          <span className="cat-bar-label">平台</span>
-          <button
-            type="button"
-            className={platform === 'all' ? 'cat-pill active' : 'cat-pill'}
-            onClick={() => setPlatform('all')}
-          >
-            全部
-            <span className="cat-count">{totalItems}</span>
-          </button>
-          {PLATFORMS.map((p) => (
-            <button
-              key={p.key}
-              type="button"
-              className={platform === p.key ? 'cat-pill active' : 'cat-pill'}
-              onClick={() => setPlatform(platform === p.key ? 'all' : p.key)}
-            >
-              <span className={`plat-dot ${p.key}`} aria-hidden="true" />
-              {p.name}
-              <span className="cat-count">{platCount[p.key] ?? 0}</span>
-            </button>
-          ))}
-        </div>
-      )}
-
-      {/* 分类筛选标签（第 3 步）：和词云点词共用同一个状态，点哪边另一边也会亮 */}
-      {phase === 'ok' && categories.length > 0 && (
-        <div className="cat-bar">
-          <span className="cat-bar-label">分类</span>
-          <button
-            type="button"
-            className={category === '全部' ? 'cat-pill active' : 'cat-pill'}
-            onClick={() => setCategory('全部')}
-          >
-            全部
-            <span className="cat-count">{totalItems}</span>
-          </button>
-          {categories.map((c) => (
-            <button
-              key={c.text}
-              type="button"
-              className={category === c.text ? 'cat-pill active' : 'cat-pill'}
-              onClick={() => setCategory(category === c.text ? '全部' : c.text)}
-            >
-              {c.text}
-              <span className="cat-count">{c.count}</span>
-            </button>
-          ))}
-          {filtering && (
-            <button
-              type="button"
-              className="cat-reset"
-              onClick={() => {
-                setCategory('全部')
-                setQuery('')
-                setPlatform('all')
+        {/* ============ Day 13 新增：视图切换按钮（三个页面互跳的主入口） ============ */}
+        {/* 说明：href 用真地址，键盘 Tab 能聚焦、回车能跳转；
+            onClick 里再用 navigate 改 hash，是为了不用整页刷新、切换是瞬时的。 */}
+        <nav className="view-tabs" aria-label="页面切换">
+          {VIEWS.map((v) => (
+            <a
+              key={v.key}
+              className={
+                route.name === v.key
+                  ? 'view-tab active'
+                  : route.name === 'platform' && v.key === 'platform'
+                    ? 'view-tab active'
+                    : route.name === 'item' && v.key === 'item'
+                      ? 'view-tab active'
+                      : 'view-tab'
+              }
+              href={`#${v.hash}`}
+              aria-current={route.name === v.key ? 'page' : undefined}
+              onClick={(e) => {
+                e.preventDefault()
+                navigate(v.hash)
               }}
             >
-              清空筛选
-            </button>
-          )}
-        </div>
-      )}
+              {v.label}
+            </a>
+          ))}
+          <span className="view-tabs-hint">地址栏的 # 后面就是当前页面</span>
+        </nav>
+      </header>
 
-      {(phase === 'loading' || phase === 'ok') && (
-        <main className="board">
-          {phase === 'loading' &&
-            SKELETON_PLATFORMS.map((p) => (
-              <section className={`column ${p}`} key={p}>
-                <div className="column-head">
-                  <div className="sk sk-head" />
-                  <div className="sk sk-chip" />
-                </div>
-                <div className="hot-list">
-                  {[...Array(10)].map((_, i) => (
-                    <div className="sk sk-item" key={i} />
-                  ))}
-                </div>
-              </section>
-            ))}
-
-          {phase === 'ok' &&
-            visibleLists.map((list) => {
-              // 本栏最高热度，条目下迷你热度条按比例算长度
-              const maxHeat = Math.max(...list.items.map((it) => heatNum(it.heat)), 1)
-
-              return (
-                <section className={`column ${list.platform}`} key={list.platform}>
-                  <div className="column-head">
-                    <h2>{list.name}</h2>
-                    <span className="column-hint">
-                      <span className="live-dot" aria-hidden="true" />
-                      {list.updated_at ? `更新 ${list.updated_at.slice(11)}` : '实时'}
-                    </span>
-                  </div>
-
-                  {/* 单榜失败：这一栏显示提示，另两栏不受影响 */}
-                  {list.status === 'error' && (
-                    <div className="col-error">
-                      <p>暂时获取不到{list.name}榜单</p>
-                      <p className="col-error-sub">其他榜单不受影响</p>
-                      <button className="retry-btn" type="button" onClick={retry}>
-                        重试
-                      </button>
-                    </div>
-                  )}
-
-                  {/* 空榜单 */}
-                  {list.status === 'empty' && (
-                    <div className="col-empty">
-                      <p>今天暂时没有数据</p>
-                    </div>
-                  )}
-
-                  {/* 筛选后这一栏空了：提示里说清是关键词还是分类筛空的 */}
-                  {list.status === 'ok' && filtering && list.items.length === 0 && (
-                    <div className="col-empty">
-                      <p>本榜没有{condText}的热搜</p>
-                    </div>
-                  )}
-
-                  {list.status === 'ok' && list.items.length > 0 && (
-                    <>
-                      <ol className="hot-list">
-                        {list.items.map((item) => {
-                          const isFav = isFavorited(list.platform, item.rank)
-                          const isEditing =
-                            editing &&
-                            editing.platform === list.platform &&
-                            editing.rank === item.rank
-                          const note = isFav
-                            ? favorites[favKey(list.platform, item.rank)].note
-                            : ''
-                          const barWidth = Math.max(
-                            6,
-                            Math.round((heatNum(item.heat) / maxHeat) * 100)
-                          )
-
-                          return (
-                            <li
-                              className={item.rank <= 3 ? 'hot-item top' : 'hot-item'}
-                              key={item.rank}
-                              title={`${item.source}热搜第 ${item.rank} 名 · ${item.category} · 点击查看原文`}
-                            >
-                              <span
-                                className={
-                                  item.rank <= 3 ? `rank rank-${item.rank}` : 'rank'
-                                }
-                              >
-                                {item.rank}
-                              </span>
-                              <div className="item-main">
-                                <div className="item-row">
-                                  <a
-                                    className="title"
-                                    href={item.url}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                  >
-                                    {item.title}
-                                  </a>
-                                  {item.tag && (
-                                    <span
-                                      className={`tag tag-${TAG_STYLE[item.tag] || 're'}`}
-                                    >
-                                      {item.tag}
-                                    </span>
-                                  )}
-                                  <span className="heat">{item.heat}</span>
-                                  {/* Day 11：复制标题 —— 有反馈的交互（成功/失败/处理中都在按钮上） */}
-                                  <CopyButton text={item.title} />
-                                  <button
-                                    className={isFav ? 'fav-star active' : 'fav-star'}
-                                    type="button"
-                                    aria-label={isFav ? '取消收藏' : '收藏'}
-                                    title={isFav ? '取消收藏' : '收藏'}
-                                    onClick={() => toggle(item, list.platform)}
-                                  >
-                                    {isFav ? '★' : '☆'}
-                                  </button>
-                                </div>
-
-                                {/* 迷你热度条：长度 = 本条热度 / 本栏最高热度 */}
-                                <div className="heat-bar" aria-hidden="true">
-                                  <i style={{ width: `${barWidth}%` }} />
-                                </div>
-
-                                {isFav && !isEditing && (
-                                  <div className="note-area">
-                                    {note && <p className="note-text">{note}</p>}
-                                    <button
-                                      className="note-btn"
-                                      type="button"
-                                      onClick={() =>
-                                        startEdit(list.platform, item.rank, note)
-                                      }
-                                    >
-                                      {note ? '改备注' : '写备注'}
-                                    </button>
-                                  </div>
-                                )}
-
-                                {isEditing && (
-                                  <div className="note-editor">
-                                    <input
-                                      type="text"
-                                      maxLength={100}
-                                      autoFocus
-                                      placeholder="写一句备注（最长 100 字）"
-                                      value={editing.value}
-                                      onChange={(e) =>
-                                        setEditing({ ...editing, value: e.target.value })
-                                      }
-                                      onKeyDown={(e) => e.key === 'Enter' && saveEdit()}
-                                    />
-                                    <button type="button" onClick={saveEdit}>
-                                      保存
-                                    </button>
-                                    <button
-                                      className="ghost"
-                                      type="button"
-                                      onClick={() => setEditing(null)}
-                                    >
-                                      取消
-                                    </button>
-                                  </div>
-                                )}
-                              </div>
-                            </li>
-                          )
-                        })}
-                      </ol>
-                      <a
-                        className="view-more"
-                        href={list.items[0].url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        查看完整榜单 →
-                      </a>
-                    </>
-                  )}
-                </section>
-              )
-            })}
-        </main>
-      )}
-
-      {/* ============ 洞察区（第 3 步）：词云 + 7 天趋势 ============ */}
-      {phase === 'ok' && (
-        <section className="insights">
-          <div className="insight-card">
-            <div className="insight-head">
-              <h3>热搜词云</h3>
-              <span className="insight-hint">点词 = 只看含这个词的热搜</span>
-            </div>
-            <WordCloud words={WORD_CLOUD} active={q} onPick={(text) => setQuery(text)} />
-            <p className="insight-note">
-              字号 = 这个词的热度权重，颜色 = 这个词最热的平台，最大的词在正中央、其余从中心向外铺开。当前是
-              mock 数据，「词」从 60 条热搜标题里提炼；接真接口后换成真实关键词即可。
-            </p>
-          </div>
-
-          <div className="insight-card">
-            <div className="insight-head">
-              <h3>7 天热度趋势</h3>
-              <span className="insight-hint">指数 100 = 该平台一周均值</span>
-            </div>
-            <TrendChart data={TREND_7D} />
-            <p className="insight-note">
-              三个平台量级差太多（抖音约 1.28 亿、百度约 1100 万），直接比会被压扁，所以换算成相对指数：指数
-              = 当天热度 ÷ 该平台 7 天平均热度 × 100。
-            </p>
-          </div>
-        </section>
-      )}
+      {/* ============ 路由出口：这里放当前该显示的页面 ============ */}
+      {view}
 
       {/* ============ 我的收藏 面板 ============ */}
       {panelOpen && (
@@ -575,9 +218,12 @@ export default function App() {
                     <div className="fav-main">
                       <a
                         className="title"
-                        href={f.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
+                        href={`#/item/${f.platform || 'douyin'}/${f.rank}`}
+                        onClick={(e) => {
+                          e.preventDefault()
+                          setPanelOpen(false)
+                          navigate(`/item/${f.platform || 'douyin'}/${f.rank}`)
+                        }}
                       >
                         {f.title}
                       </a>
@@ -618,7 +264,7 @@ export default function App() {
           ))}
         </div>
         <p>
-          mock 数据版本（Day 8~12 · 搜索/刷新/深浅色 + 分类/平台筛选 + 词云 + 7 天趋势）｜点击标题跳转原平台｜收藏和备注保存在你自己的浏览器里，无需注册
+          mock 数据版本（Day 8~13 · 三级页面 + 加载/成功/空/错误四种状态）｜hash 路由，网址可直接分享｜收藏和备注保存在你自己的浏览器里，无需注册
         </p>
       </footer>
     </div>
