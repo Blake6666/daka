@@ -17,7 +17,7 @@
 
 | 检查项 | 在哪 | 换号后还在吗 |
 |---|---|---|
-| 项目代码 | `C:\Users\Administrator\WorkBuddy\daka\` | ✅ 在，这是你自己的文件夹 |
+| 项目代码 | 你当前工作区里的 `daka/` 文件夹 | ✅ 在，这是你自己的文件夹 |
 | GitHub 仓库 | `github.com/Blake6666/daka` | ✅ 在，跟 WorkBuddy 账号无关 |
 | **14 天工作日志** | `.workbuddy/memory/*.md` | ⚠️ 只在这台电脑上 → **已汇总进 `HANDOFF.md` + `DECISIONS.md` 并提交进仓库** |
 | **每日一问答案 + 9 次拍板** | 同上，同样只在本地 | ⚠️ **已固化进 `DECISIONS.md`** |
@@ -25,7 +25,7 @@
 | 市场插件 | `settings.json` 的 `enabledPlugins` | ❌ 跟账号绑定，要重装 |
 | 历史对话 | 账号云端 | ⚠️ 大概率带不走 |
 
-**GitHub 仓库账号**：Blake6666，邮箱 2697183340@qq.com —— 18 个提交，最新 `e2cfa6f`。
+**GitHub 仓库账号**：Blake6666（公开仓库，网址在下方第「二」节）—— 19 个提交，最新 `9528b83`。
 
 ---
 
@@ -122,7 +122,7 @@
 3. **重装技能**：`headless-page-verify`（我天天用的无头浏览器验证脚本）。**项目里已有一份拷贝 `skills/headless-page-verify/SKILL.md`，装不上就直接读那个文件让我用它**。`basketball-career-sim-v6` 与本项目无关，按需
 4. **按需重装市场插件**：`settings.json` 里 `enabledPlugins` 记的那些（Office 那套、剪辑那套等）
 5. **确认 Git 代理还活着**：`git config --get http.https://github.com.proxy`，没有就 `git config --global http.https://github.com.proxy http://127.0.0.1:65532`（端口按 Nano 当前实际端口填）
-6. **开项目**：`cd C:\Users\Administrator\WorkBuddy\daka\frontend` 然后 `npm run dev`
+6. **开项目**：`cd daka/frontend` 然后 `npm run dev`（工作区根目录就是 `daka/`）
 
 ---
 
@@ -131,7 +131,7 @@
 | 事项 | 状态 |
 |---|---|
 | **Day 14 真人测试** | ⚠️ **最重要**。我做的是「卡住降级」自测，`TEST_RECORD.md` 里所有「原话」都是推演的。真人测完必须重填第一节和所有「原话」栏 |
-| **附录 A 周验证日模板** | ⚠️ **丢了**。Day 7 用户直接在对话里发的，没存文件。Day 7 / Day 14 都是周验证日要交材料 → **让用户重发一次，我存成 `APPENDIX_A.md`** |
+| **周验证日材料** | 🔄 Day 14 的已按模板写好（`WEEKLY_DAY14.md`），**还差姓名/校区 + 截图**。Day 7 那周的没补 |
 | Day 12 每日一问答案 | ⚠️ 缺失，日志里没记，用户当时也没明说。交作业前要补 |
 | Day 15 清单 | 还没发 |
 | 接真数据 | 第 3 周（Day 21） |
@@ -167,6 +167,8 @@
 | `TECH_DESIGN.md` | 技术设计（含第 9.1 节说人话版） | Day 5 |
 | `DESIGN_RULES.md` | 界面设计规则（改界面先对照它） | Day 9 |
 | `RUN.md` | 运行说明 + 验收复核记录 | Day 7 起 |
+| `APPENDIX_A.md` | **课程附录 A：打卡模板 + 求助模板 + 周验证日模板**（此前丢失，10-04 补回存档） | 存档 |
+| `WEEKLY_DAY14.md` | **第 2 周周验证日材料**（待填姓名/校区 + 截图） | Day 14 |
 | `TEST_CHECKLIST.md` | 用户测试清单（发给同伴看的那份） | Day 14 |
 | `TEST_RECORD.md` | 测试记录（自测已填，真人部分待填） | Day 14 |
 | `skills/design-review/` | 设计审查技能 + 调用记录（**已进 Git**） | Day 12 |
