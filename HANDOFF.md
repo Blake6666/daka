@@ -19,19 +19,21 @@
 |---|---|---|
 | 项目代码 | `C:\Users\Administrator\WorkBuddy\daka\` | ✅ 在，这是你自己的文件夹 |
 | GitHub 仓库 | `github.com/Blake6666/daka` | ✅ 在，跟 WorkBuddy 账号无关 |
-| 14 天工作日志 | `.workbuddy/memory/*.md` | ⚠️ 只在这台电脑上（**已汇总进本文件**） |
+| **14 天工作日志** | `.workbuddy/memory/*.md` | ⚠️ 只在这台电脑上 → **已汇总进 `HANDOFF.md` + `DECISIONS.md` 并提交进仓库** |
+| **每日一问答案 + 9 次拍板** | 同上，同样只在本地 | ⚠️ **已固化进 `DECISIONS.md`** |
 | 用户级技能 | `~/.workbuddy/skills/` | ❌ 可能要重装（见第五节） |
 | 市场插件 | `settings.json` 的 `enabledPlugins` | ❌ 跟账号绑定，要重装 |
+| 历史对话 | 账号云端 | ⚠️ 大概率带不走 |
 
-**GitHub 仓库账号**：Blake6666，邮箱 2697183340@qq.com —— 16 个提交，最新 `51b1751 Day 14`。
+**GitHub 仓库账号**：Blake6666，邮箱 2697183340@qq.com —— 18 个提交，最新 `e2cfa6f`。
 
 ---
 
-## 二、项目是什么
+## 二、这个项目是什么
 
 「全网热搜聚合」——把抖音、B站、百度三个平台的热搜榜单聚合成一个网站。
 
-这是 Vibe Coding 28 天训练营的练习项目，Day 3~14 走完了「研究 → PRD → 选型 → 开发 → 测试」全流程。
+这是 Vibe Coding 28 天训练营的练习项目，Day 3~14 走完了「研究 → PRD → 选型 → 开发 → 测试」全流程。**课程还剩一半（Day 15~28）**，Day 21 是同伴交叉验证，Day 27 要请一位外部真人试用。
 
 **当前是 mock 数据**（页面上有「mock 数据」徽标，不冒充真数据）。三个平台都没有免密的公开接口，这是 Day 5 就预判到的降级方案。
 
@@ -111,13 +113,15 @@
 
 ## 五、换号后要做的事
 
+**新账号第一句话就说这个**：
+
+> 「读一下 `daka` 文件夹里的 `AGENTS.md`、`HANDOFF.md`、`DECISIONS.md`，接上下文，继续 Day 15。」
+
 1. **读 `AGENTS.md`** —— 14 天攒下的协作规则（清单即任务范围、一次一步、提交前先列文件、只允许 `git revert` 等），这是最值钱的一份
-2. **读本文件** —— 接上下文
-3. **重装技能**（零安装的小工具，几秒钟）：
-   - `headless-page-verify`：系统 Edge 无头 + CDP 页面验证
-   - `basketball-career-sim-v6`：与本项目无关，按需
-4. **按需重装市场插件**：`settings.json` 里 `enabledPlugins` 记的那些
-5. **确认 Git 代理还在**：`git config --get http.https://github.com.proxy`，没有就设上
+2. **读本文件 + `DECISIONS.md`** —— 接上现状和「为什么」
+3. **重装技能**：`headless-page-verify`（我天天用的无头浏览器验证脚本）。**项目里已有一份拷贝 `skills/headless-page-verify/SKILL.md`，装不上就直接读那个文件让我用它**。`basketball-career-sim-v6` 与本项目无关，按需
+4. **按需重装市场插件**：`settings.json` 里 `enabledPlugins` 记的那些（Office 那套、剪辑那套等）
+5. **确认 Git 代理还活着**：`git config --get http.https://github.com.proxy`，没有就 `git config --global http.https://github.com.proxy http://127.0.0.1:65532`（端口按 Nano 当前实际端口填）
 6. **开项目**：`cd C:\Users\Administrator\WorkBuddy\daka\frontend` 然后 `npm run dev`
 
 ---
@@ -127,12 +131,16 @@
 | 事项 | 状态 |
 |---|---|
 | **Day 14 真人测试** | ⚠️ **最重要**。我做的是「卡住降级」自测，`TEST_RECORD.md` 里所有「原话」都是推演的。真人测完必须重填第一节和所有「原话」栏 |
+| **附录 A 周验证日模板** | ⚠️ **丢了**。Day 7 用户直接在对话里发的，没存文件。Day 7 / Day 14 都是周验证日要交材料 → **让用户重发一次，我存成 `APPENDIX_A.md`** |
+| Day 12 每日一问答案 | ⚠️ 缺失，日志里没记，用户当时也没明说。交作业前要补 |
 | Day 15 清单 | 还没发 |
 | 接真数据 | 第 3 周（Day 21） |
 | 截图 | Day 9~14 的截图都攒着，最后一起拍（用户的节奏） |
 | 词云里补「AI」等真关键词 | Day 14 测试的意外发现：36 个词里没有一个含「AI」，用户真搜「AI」一个都搜不到 |
 | 平台栏/分类栏区分 | Day 14 测试第二个卡点：两排胶囊长得几乎一样，靠 12px 小标签区分，会「差点点错」 |
+| `favicon.ico` 404 | Day 11 发现的已知无关项，一直没补（如果要补，加个 emoji 的 SVG data URI 进 `index.html`） |
 | 「今日新增 18」写死的假数字 | Hero 区的，RUN.md 已诚实标注 |
+| 根目录占位 `index.html` | Day 7 已删除（用户拍板 B 案） |
 
 ---
 
@@ -151,7 +159,9 @@
 
 | 文件 | 是什么 | 哪天的 |
 |---|---|---|
-| `AGENTS.md` | 协作规则（最重要） | Day 1 起，Day 6 追加 |
+| **`AGENTS.md`** | **协作规则（最重要，换号第一件事读它）** | Day 1 起，Day 6 追加 |
+| **`HANDOFF.md`** | **本文件：现状 + 约定 + 踩过的坑 + 待办** | Day 14 |
+| **`DECISIONS.md`** | **14 天的拍板记录 + 每日一问答案 + 我的关键选择** | Day 14 |
 | `research.md` | 需求研究、砍功能的理由 | Day 3 |
 | `PRD.md` | 产品需求 v1.1（含第 11 节变更记录） | Day 4 |
 | `TECH_DESIGN.md` | 技术设计（含第 9.1 节说人话版） | Day 5 |
@@ -159,5 +169,20 @@
 | `RUN.md` | 运行说明 + 验收复核记录 | Day 7 起 |
 | `TEST_CHECKLIST.md` | 用户测试清单（发给同伴看的那份） | Day 14 |
 | `TEST_RECORD.md` | 测试记录（自测已填，真人部分待填） | Day 14 |
-| `skills/design-review/` | 设计审查技能 + 调用记录 | Day 12 |
-| `.workbuddy/memory/*.md` | 14 天工作日志（**只在这台电脑上**） | Day 1~14 |
+| `skills/design-review/` | 设计审查技能 + 调用记录（**已进 Git**） | Day 12 |
+| `.workbuddy/memory/*.md` | 14 天工作日志（**只在本地，已汇总进上面两份**） | Day 1~14 |
+| `~/.workbuddy/skills/headless-page-verify/` | 无头浏览器验证技能（**不在 Git，换号要重装或拷这个文件**） | — |
+| `~/.workbuddy/skills/basketball-career-sim-v6/` | 篮球模拟器（与本项目无关） | — |
+
+## 九、换号后如果想恢复到最完整的状态
+
+假设你连新电脑一起换了（不只是换号）：
+
+1. `git clone https://github.com/Blake6666/daka.git` —— 代码和文档全回来了
+2. `cd daka && cd frontend && npm install` —— 装依赖（39 个包）
+3. 读 `AGENTS.md` + `HANDOFF.md` + `DECISIONS.md` —— 接上下文
+4. 把 `~/.workbuddy/skills/headless-page-verify/SKILL.md` 这个文件从旧电脑拷过来（10.7KB，一个文件），或者让新 AI 照着重写一遍
+5. 设 Git 代理：`git config --global http.https://github.com.proxy http://127.0.0.1:65532`（端口按 Nano 当前实际端口填）
+6. `npm run dev` 启动，`http://localhost:5173/` 打开
+
+**注意**：`.workbuddy/memory/` 不在 Git 里。如果连电脑一起换，那 12 份日志会丢——但 `HANDOFF.md` 和 `DECISIONS.md` 已经把它们里最重要的部分都带走了。
