@@ -63,14 +63,22 @@
 
 ## 三、技术栈与关键约定
 
-- **React 18 + Vite 5**，纯前端，不接云端（Day 7 用户拍板走 7A 路线）
+- **React 18 + Vite 5**，**Day 15 起已接 CloudBase 云端**（Day 7~14 走的是 7A 临时路线：不接云端、数据用 mock；Day 15 按计划回归 Day 5 的 C 路线）
 - 端口固定 5173（写死在 `vite.config.js` 的 `strictPort`）
 - **Node 用这个绝对路径**（本会话 Bash 是精简终端，coreutils 命令不存在）：
   ```
-  C:/Users/Administrator/.workbuddy/binaries/node/versions/22.22.2-3/node.exe
+  C:/Users/Administrator/.workbuddy/binaries/node/versions/22.22.2-6/node.exe
   ```
+  ⚠️ **末尾那个后缀会随 WorkBuddy 客户端升级变**（曾是 `-3`，2026-10-07 客户端更新后变成 `-6`，旧目录直接消失、报 `No such file or directory`）。**报这个错先 `ls versions/` 看现在实际是哪个**，别照抄旧路径。
   跑 vite：`node node_modules/vite/bin/vite.js`
   跑 npm：`node <node>/node_modules/npm/bin/npm-cli.js`
+- **CloudBase CLI**（Day 15 装的，第 3~4 周天天用）：
+  ```
+  安装位置：C:/Users/Administrator/.workbuddy/binaries/node/workspace/node_modules/.bin/tcb
+  版本：3.8.5
+  跑法："<上面那个目录>/tcb" <命令>      例：tcb login / tcb env list / tcb fn deploy
+  ```
+  不在 daka 仓库里（在托管 workspace），**所以换设备要重装**。
 - **数据是 mock 的**，`frontend/src/data/hotlistData.js`，数据结构与云函数返回格式对齐，换真数据时只动这个文件
 - 样式全在 `frontend/src/styles.css`，设计规则见 `DESIGN_RULES.md`（改界面先对照它）
 
@@ -131,6 +139,11 @@
 | 事项 | 状态 |
 |---|---|
 | **Day 14 真人测试** | ⚠️ **最重要**。我做的是「卡住降级」自测，`TEST_RECORD.md` 里所有「原话」都是推演的。真人测完必须重填第一节和所有「原话」栏 |
+| **云端环境三件套** | ✅ Day 15 已记：环境 ID `daka-hot-search-d9fysh19ee8fe0f8` / 3000 资源点 / **到期 2027-04-07** / 未开按量计费。记录表在 `.workbuddy/memory/day15-cloudbase-env.md`（不进 Git） |
+| 🔴 **免费环境续期** | **2027-04-07 到期，到期公网地址直接失效、不会自动续费。** 控制台首页「3 个事项」里有「**免费体验版续期计划，领取 6 个月体验**」——**用户 2026-10-07 明确说：完成 28 天打卡后再提醒他续期。届时提醒他点一下，能多撑 6 个月** |
+| 🔴 **CLI 登录有效期** | **2026-11-06 到期**，到期要重新 `tcb login`。**重新登录前必须先设 `TCB_SITE=domestic`**（已建议用户 `setx TCB_SITE domestic` 永久化，**要确认他真的执行了**），否则会报「环境不兼容」登录失败 |
+| **Day 15 三张交作业截图** | 🔄 还没拍。**注意：公网地址是测试域名，浏览器首次打开会先弹「风险提醒」页，必须点「我是开发者」再截图**，否则截到的是提醒页。`/api/health` 在浏览器里会下载文件（响应头 `content-disposition: attachment`），**用 curl 截图更合适** |
+| **Day 15 云函数控制台与仓库不一致** | 控制台那个函数还带着模板自带的 `cloudbaserc.json` / `README_*` / `.vscode`，**本地仓库里没有**。Day 20 传代码包时会撞到，届时要么补齐要么删干净 |
 | **周验证日材料** | 🔄 Day 14 的已按模板写好（`WEEKLY_DAY14.md`），**还差姓名/校区 + 截图**。Day 7 那周的没补 |
 | Day 12 每日一问答案 | ⚠️ 缺失，日志里没记，用户当时也没明说。交作业前要补 |
 | Day 15 清单 | 还没发 |
@@ -161,7 +174,8 @@
 |---|---|---|
 | **`AGENTS.md`** | **协作规则（最重要，换号第一件事读它）** | Day 1 起，Day 6 追加 |
 | **`HANDOFF.md`** | **本文件：现状 + 约定 + 踩过的坑 + 待办** | Day 14 |
-| **`DECISIONS.md`** | **14 天的拍板记录 + 每日一问答案 + 我的关键选择** | Day 14 |
+| **`DECISIONS.md`** | **14 天的拍板记录 + 每日一问答案 + 我的关键选择**（Day 15 已补：7A 结束回归 C 路线、事件函数 vs Web 函数、集成响应格式、部署走混合路径、`TCB_SITE`） | Day 14 起 |
+| **`api-contract.md`** | **接口契约：10 个接口（1 个已实现 + 9 个占位）**。Day 17~22 建表和写接口的**唯一依据**，改它要同步 PRD | Day 15 |
 | `research.md` | 需求研究、砍功能的理由 | Day 3 |
 | `PRD.md` | 产品需求 v1.1（含第 11 节变更记录） | Day 4 |
 | `TECH_DESIGN.md` | 技术设计（含第 9.1 节说人话版） | Day 5 |
