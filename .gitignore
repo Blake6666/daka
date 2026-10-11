@@ -1,0 +1,23 @@
+# 依赖与构建产物
+node_modules/
+dist/
+build/
+
+# 🔒 绝不能进 Git 的东西（AGENTS.md 第八节：密钥不进仓库）
+.env
+.env.*
+*.pem
+*.key
+
+# 口令哈希等本地配置
+*.local.json
+secrets.json
+
+# 工作日志与临时文件（本项目不放 WorkBuddy 日志，但留个兜底）
+.workbuddy/
+*.log
+
+# 编辑器
+.vscode/
+.idea/
+.DS_Store
